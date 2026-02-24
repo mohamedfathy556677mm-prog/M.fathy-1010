@@ -2,20 +2,31 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>برنامج خاص لاستاذ بن غازي لجورجيا</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مولد عروض السياحة - لوحة التحكم</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
+            --primary-color: #1E88E5;
+            --primary-light: #E3F2FD;
+            --secondary-color: #42A5F5;
+            --accent-color: #FF6F00;
+            --text-dark: #212121;
+            --text-light: #757575;
+            --bg-color: #F5F7FA;
+            --white: #FFFFFF;
+            --border-color: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            
+            /* Offer Template Colors */
             --primary: #1A2536;
-            --primary-light: #2C3E50;
-            --accent: #FF6B35;
+            --primary-light-2: #2C3E50;
+            --accent-2: #FF6B35;
             --accent-light: #FF8C61;
             --bg-light: #F4F6F8;
-            --text-dark: #1A202C;
-            --text-muted: #718096;
-            --white: #FFFFFF;
             --card-shadow: 0 10px 40px rgba(26, 37, 54, 0.1);
             --radius: 20px;
         }
@@ -25,18 +36,520 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
+        html {
+            font-size: 16px;
+        }
+
         body {
             font-family: 'Tajawal', sans-serif;
-            background-color: #E5E5E5;
+            background-color: var(--bg-color);
             color: var(--text-dark);
-            line-height: 1.8;
             display: flex;
             justify-content: center;
-            padding: 20px;
+            padding: 1rem;
+            min-height: 100vh;
         }
-        
-        .poster-container {
+
+        /* Admin Panel Styles */
+        .admin-container {
+            width: 100%;
+            max-width: 720px;
+            min-height: 90vh;
+            background-color: var(--white);
+            border-radius: 1rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .company-logo {
+            width: 2.5rem;
+            height: 2.5rem;
+            object-fit: contain;
+            background: white;
+            border-radius: 50%;
+            padding: 0.25rem;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 0.1rem;
+            line-height: 1.2;
+        }
+
+        .header-title p {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            line-height: 1.2;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: #E65100;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255,255,255,0.2);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+
+        .btn-add {
+            background-color: var(--primary-color);
+            color: var(--white);
+            margin-top: 0.625rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-add:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-remove {
+            background-color: #f44336;
+            color: white;
+            margin-top: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-remove:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 0.75rem;
+            overflow-x: auto;
+        }
+
+        .tabs {
+            display: flex;
+            list-style: none;
+        }
+
+        .tab {
+            padding: 0.875rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            border-bottom: 0.1875rem solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--primary-color);
+            background-color: #F5F5F5;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 1.25rem;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-section {
+            background-color: var(--white);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 0.375rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-family: inherit;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.125rem var(--primary-light);
+        }
+
+        .image-upload {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .image-preview {
+            width: 5rem;
+            height: 5rem;
+            background-color: #F5F5F5;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 0.75rem;
+            border: 0.125rem dashed var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-buttons {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .upload-btn {
+            padding: 0.5rem 0.75rem;
+            background-color: #F5F5F5;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: #EEEEEE;
+        }
+
+        .info-box {
+            background-color: var(--primary-light);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .info-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-content {
+            font-size: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .info-content ul {
+            padding-right: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .info-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: #F5F5F5;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 2.75rem;
+            height: 1.5rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #BDBDBD;
+            transition: .4s;
+            border-radius: 1.5rem;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 1.125rem;
+            width: 1.125rem;
+            left: 0.1875rem;
+            bottom: 0.1875rem;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(1.25rem);
+        }
+
+        /* Table Styles */
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.625rem;
+        }
+
+        .schedule-table th {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            padding: 0.75rem;
+            text-align: right;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border-bottom: 0.125rem solid var(--primary-color);
+        }
+
+        .schedule-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.75rem;
+        }
+
+        .schedule-table tr:hover {
+            background-color: #F9F9F9;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #F5F5F5;
+            padding: 0.75rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .payment-badge {
+            background-color: #EEEEEE;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.6875rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-spinner {
+            border: 0.25rem solid rgba(0, 0, 0, 0.1);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Offer Template Styles (Hidden by default) */
+        .offer-template {
+            display: none;
             width: 100%;
             max-width: 800px;
             background: var(--white);
@@ -44,23 +557,24 @@
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border-radius: 0;
+            margin: 0 auto;
         }
 
         @media (min-width: 800px) {
-            .poster-container {
-                border-radius: 24px;
-                margin: 40px 0;
+            .offer-template {
+                border-radius: 1.5rem;
+                margin: 2.5rem auto;
             }
         }
         
         /* Header Design */
-        .header {
+        .offer-header {
             position: relative;
-            height: 400px;
+            height: 25rem;
             overflow: hidden;
         }
         
-        .header-bg {
+        .offer-header-bg {
             position: absolute;
             top: 0;
             left: 0;
@@ -70,7 +584,7 @@
             z-index: 0;
         }
         
-        .header-overlay {
+        .offer-header-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -82,30 +596,30 @@
 
         .brand-badge {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 1.25rem;
+            right: 1.25rem;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            padding: 8px 20px;
+            padding: 0.5rem 1.25rem;
             border-radius: 50px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.625rem;
             z-index: 2;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .brand-badge img {
-            height: 40px;
+            height: 2.5rem;
         }
 
         .brand-badge span {
             color: var(--primary);
             font-weight: 700;
-            font-size: 14px;
+            font-size: 0.875rem;
         }
         
-        .header-content {
+        .offer-header-content {
             position: relative;
             z-index: 2;
             height: 100%;
@@ -114,52 +628,52 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 0 40px;
+            padding: 0 2.5rem;
             color: white;
         }
         
         .tag-pill {
-            background: var(--accent);
+            background: var(--accent-2);
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 0.3125rem 0.9375rem;
+            border-radius: 1.25rem;
+            font-size: 0.875rem;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 0.9375rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.0625rem;
             box-shadow: 0 4px 10px rgba(255, 107, 53, 0.4);
         }
 
-        .title {
-            font-size: 42px;
+        .offer-title {
+            font-size: 2.5rem;
             font-weight: 800;
-            margin-bottom: 10px;
+            margin-bottom: 0.625rem;
             text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
-        .subtitle {
-            font-size: 20px;
+        .offer-subtitle {
+            font-size: 1.25rem;
             font-weight: 500;
             opacity: 0.9;
-            max-width: 600px;
+            max-width: 37.5rem;
         }
         
         /* Content Wrapper */
-        .content-wrapper {
-            padding: 40px;
+        .offer-content-wrapper {
+            padding: 2.5rem;
             position: relative;
         }
 
-        .content-wrapper::before {
+        .offer-content-wrapper::before {
             content: '';
             position: absolute;
-            top: -40px;
+            top: -2.5rem;
             left: 0;
             right: 0;
-            height: 60px;
+            height: 3.75rem;
             background: var(--white);
-            border-radius: 40px 40px 0 0;
+            border-radius: 2.5rem 2.5rem 0 0;
             z-index: 1;
         }
 
@@ -167,16 +681,16 @@
         .overview-cards {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 40px;
+            gap: 0.9375rem;
+            margin-bottom: 2.5rem;
             position: relative;
             z-index: 2;
         }
 
         .info-card {
             background: var(--bg-light);
-            padding: 20px 15px;
-            border-radius: 16px;
+            padding: 1.25rem 0.9375rem;
+            border-radius: 1rem;
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid transparent;
@@ -189,54 +703,54 @@
         }
 
         .info-card .material-icons {
-            font-size: 32px;
-            color: var(--accent);
-            margin-bottom: 10px;
+            font-size: 2rem;
+            color: var(--accent-2);
+            margin-bottom: 0.625rem;
             background: rgba(255, 107, 53, 0.1);
-            padding: 10px;
+            padding: 0.625rem;
             border-radius: 50%;
         }
 
         .info-label {
             display: block;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.3125rem;
         }
 
         .info-value {
             font-weight: 700;
             color: var(--primary);
-            font-size: 14px;
+            font-size: 0.875rem;
         }
 
         /* Section Styling */
-        .section {
-            margin-bottom: 40px;
+        .offer-section {
+            margin-bottom: 2.5rem;
         }
 
         .section-header {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.625rem;
             border-bottom: 2px solid var(--bg-light);
         }
 
         .section-icon {
             background: var(--primary);
             color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: 15px;
+            margin-left: 0.9375rem;
         }
 
         .section-title {
-            font-size: 22px;
+            font-size: 1.375rem;
             font-weight: 700;
             color: var(--primary);
         }
@@ -245,31 +759,31 @@
         .flight-card {
             background: var(--bg-light);
             border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 15px;
+            padding: 1.25rem;
+            margin-bottom: 0.9375rem;
             display: flex;
             align-items: center;
             position: relative;
             overflow: hidden;
-            border-right: 5px solid var(--accent);
+            border-right: 0.3125rem solid var(--accent-2);
         }
 
         .flight-icon-box {
-            width: 50px;
-            height: 50px;
+            width: 3.125rem;
+            height: 3.125rem;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: 20px;
+            margin-left: 1.25rem;
             flex-shrink: 0;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
         .flight-icon-box .material-icons {
             color: var(--primary);
-            font-size: 24px;
+            font-size: 1.5rem;
         }
 
         .flight-details {
@@ -280,40 +794,41 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 0.625rem;
         }
 
         .flight-route {
             font-weight: 700;
-            font-size: 18px;
+            font-size: 1.125rem;
             color: var(--text-dark);
         }
 
         .flight-date {
             background: var(--primary);
             color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
         }
 
         .flight-meta {
             display: flex;
-            gap: 20px;
-            font-size: 14px;
-            color: var(--text-muted);
+            gap: 1.25rem;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            flex-wrap: wrap;
         }
 
         .flight-meta span {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 0.3125rem;
         }
 
         /* Hotels Styling */
         .hotels-grid {
             display: grid;
-            gap: 20px;
+            gap: 1.25rem;
         }
 
         .hotel-card {
@@ -331,13 +846,13 @@
         }
 
         .hotel-image {
-            width: 140px;
+            width: 8.75rem;
             height: auto;
             object-fit: cover;
         }
 
         .hotel-content {
-            padding: 15px 20px;
+            padding: 0.9375rem 1.25rem;
             flex: 1;
         }
 
@@ -345,106 +860,185 @@
             display: inline-block;
             background: rgba(26, 37, 54, 0.1);
             color: var(--primary);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
         }
 
         .hotel-name {
-            font-size: 18px;
+            font-size: 1.125rem;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 0.3125rem;
             color: var(--text-dark);
         }
 
         .hotel-room {
-            font-size: 14px;
-            color: var(--text-muted);
+            font-size: 0.875rem;
+            color: var(--text-light);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 0.3125rem;
+        }
+
+        /* Car Rental Section */
+        .car-card {
+            background: var(--bg-light);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-top: 0.9375rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .car-header {
+            background: linear-gradient(to right, var(--primary), var(--primary-light-2));
+            color: white;
+            padding: 0.9375rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .car-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .car-table th {
+            text-align: right;
+            padding: 0.75rem 1.25rem;
+            background: #f0f2f5;
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom: 1px solid #e0e0e0;
+            width: 30%;
+        }
+
+        .car-table td {
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* Transfers Section */
+        .transfers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.625rem;
+            background: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .transfers-table thead tr {
+            background: var(--primary);
+            color: white;
+        }
+
+        .transfers-table th {
+            padding: 0.75rem 0.9375rem;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .transfers-table td {
+            padding: 0.75rem 0.9375rem;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.875rem;
+        }
+
+        .transfers-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .transfers-table tbody tr:nth-child(even) {
+            background: #FAFAFA;
+        }
+
+        .trans-icon {
+            color: var(--accent-2);
+            font-weight: bold;
         }
 
         /* Timeline Itinerary */
         .timeline {
             position: relative;
-            padding-right: 30px;
+            padding-right: 1.875rem;
         }
 
         .timeline::before {
             content: '';
             position: absolute;
-            right: 7px;
-            top: 10px;
-            bottom: 10px;
-            width: 2px;
+            right: 0.4375rem;
+            top: 0.625rem;
+            bottom: 0.625rem;
+            width: 0.125rem;
             background: #E2E8F0;
         }
 
         .timeline-item {
             position: relative;
-            margin-bottom: 30px;
+            margin-bottom: 1.875rem;
         }
 
         .timeline-dot {
             position: absolute;
-            right: -27px;
-            top: 5px;
-            width: 16px;
-            height: 16px;
+            right: -1.6875rem;
+            top: 0.3125rem;
+            width: 1rem;
+            height: 1rem;
             border-radius: 50%;
             background: var(--white);
-            border: 4px solid var(--accent);
+            border: 0.25rem solid var(--accent-2);
             z-index: 1;
         }
 
         .timeline-day-title {
-            font-size: 18px;
+            font-size: 1.125rem;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 10px;
+            margin-bottom: 0.625rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.625rem;
         }
 
         .timeline-content {
             background: var(--bg-light);
-            padding: 15px;
-            border-radius: 12px;
-            margin-right: 10px;
+            padding: 0.9375rem;
+            border-radius: 0.75rem;
+            margin-right: 0.625rem;
         }
 
         .activity-tag {
             display: inline-flex;
             align-items: center;
-            padding: 5px 10px;
-            margin: 0 0 8px 0;
+            padding: 0.3125rem 0.625rem;
+            margin: 0 0 0.5rem 0;
             background: white;
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
             color: var(--text-dark);
             width: 100%;
         }
         
         .activity-tag i {
-            color: var(--accent);
-            font-size: 16px;
-            margin-left: 8px;
+            color: var(--accent-2);
+            font-size: 1rem;
+            margin-left: 0.5rem;
         }
 
         /* Cost & Payment */
         .cost-card {
             background: linear-gradient(135deg, var(--primary) 0%, #2C3E50 100%);
             color: white;
-            padding: 30px;
+            padding: 1.875rem;
             border-radius: var(--radius);
             text-align: center;
             position: relative;
             overflow: hidden;
-            margin-bottom: 30px;
+            margin-bottom: 1.875rem;
         }
 
         .cost-card::after {
@@ -459,27 +1053,27 @@
         }
 
         .total-label {
-            font-size: 16px;
+            font-size: 1rem;
             opacity: 0.8;
-            margin-bottom: 5px;
+            margin-bottom: 0.3125rem;
             position: relative;
             z-index: 1;
         }
 
         .total-amount {
-            font-size: 36px;
+            font-size: 2.25rem;
             font-weight: 800;
-            margin-bottom: 15px;
+            margin-bottom: 0.9375rem;
             position: relative;
             z-index: 1;
         }
 
         .discount-badge {
-            background: var(--accent);
+            background: var(--accent-2);
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 0.3125rem 0.9375rem;
+            border-radius: 1.25rem;
+            font-size: 0.875rem;
             font-weight: 700;
             display: inline-block;
             position: relative;
@@ -489,23 +1083,23 @@
         /* Payment Methods Grid */
         .payment-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+            gap: 0.625rem;
+            margin-top: 1.25rem;
         }
 
         .payment-item {
             background: var(--bg-light);
-            padding: 10px;
-            border-radius: 10px;
+            padding: 0.625rem;
+            border-radius: 0.625rem;
             text-align: center;
-            font-size: 13px;
+            font-size: 0.8125rem;
             font-weight: 600;
             color: var(--text-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 0.3125rem;
         }
 
         .payment-item i {
@@ -515,15 +1109,15 @@
         .bank-card {
             background: white;
             border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
+            border-radius: 0.75rem;
+            padding: 0.9375rem;
+            margin-bottom: 0.625rem;
         }
 
         .bank-header {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 0.625rem;
             color: var(--primary);
             font-weight: 700;
         }
@@ -531,12 +1125,12 @@
         .bank-info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
+            margin-bottom: 0.3125rem;
+            font-size: 0.875rem;
         }
         
         .bank-info-label {
-            color: var(--text-muted);
+            color: var(--text-light);
         }
 
         .bank-info-value {
@@ -546,37 +1140,96 @@
             text-align: right;
         }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 30px;
+        /* Policies Section Styling */
+        .policies-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .policy-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .policy-header {
             background: var(--bg-light);
-            color: var(--text-muted);
-            font-size: 14px;
+            padding: 0.9375rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .policy-header i {
+            color: var(--accent-2);
+        }
+
+        .policy-header h4 {
+            color: var(--primary);
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .policy-body {
+            padding: 1.25rem;
+        }
+
+        .policy-list {
+            list-style: none;
+        }
+
+        .policy-list li {
+            position: relative;
+            padding-right: 1.25rem;
+            margin-bottom: 0.625rem;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .policy-list li::before {
+            content: "•";
+            color: var(--accent-2);
+            font-weight: bold;
+            font-size: 1.125rem;
+            position: absolute;
+            right: 0;
+            top: -0.125rem;
+        }
+
+        /* Footer */
+        .offer-footer {
+            text-align: center;
+            padding: 1.875rem;
+            background: var(--bg-light);
+            color: var(--text-light);
+            font-size: 0.875rem;
         }
         
         .footer-logo {
-            margin-bottom: 15px;
+            margin-bottom: 0.9375rem;
         }
         
         .footer-logo img {
-            height: 60px;
+            height: 3.75rem;
             opacity: 0.9;
         }
 
         .terms-list li {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
+            font-size: 0.8125rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
             position: relative;
-            padding-right: 15px;
+            padding-right: 0.9375rem;
         }
 
         .terms-list li::before {
             content: '•';
             position: absolute;
             right: 0;
-            color: var(--accent);
+            color: var(--accent-2);
         }
 
         /* Responsive */
@@ -586,7 +1239,7 @@
             }
             
             .title {
-                font-size: 32px;
+                font-size: 2rem;
             }
             
             .flight-card {
@@ -597,7 +1250,7 @@
             .flight-main-info {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 5px;
+                gap: 0.3125rem;
             }
             
             .hotel-card {
@@ -606,347 +1259,1649 @@
             
             .hotel-image {
                 width: 100%;
-                height: 180px;
+                height: 11.25rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .schedule-table {
+                font-size: 0.6875rem;
+            }
+
+            .schedule-table th, .schedule-table td {
+                padding: 0.5rem 0.25rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="poster-container">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p style="font-size: 1.125rem; font-weight: 600; color: var(--primary-color);">جاري إنشاء ملف PDF...</p>
+        <p style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.5rem;">قد يستغرق هذا بضع ثوانٍ</p>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-container" id="admin-panel">
         <!-- Header -->
         <div class="header">
-            <img src="https://sfile.chatglm.cn/images-ppt/5a9413eb21e0.jpg" alt="Georgia Landscape" class="header-bg">
-            <div class="header-overlay"></div>
-            
-            <div class="brand-badge">
-                <img src="https://z-cdn-media.chatglm.cn/files/5054d39c-ea32-4a6a-849f-54e4fbcb8612.png?auth_key=1870906253-ab0e3e46b2ee4b17b7a958fea3f201e2-0-923120d55ccde393668a4f0c066784c9" alt="World Gates Logo">
-                <span>بوابات العالم للسفر والسياحة</span>
-            </div>
-            
             <div class="header-content">
-                <div class="tag-pill">رحلة مميزة</div>
-                <h1 class="title">برنامج خاص لاستاذ بن غازي</h1>
-                <h2 class="subtitle">جورجيا - تيبليسي – باكورياني - كوتايسي – باتومي</h2>
+                <div class="logo-container">
+                    <img src="https://z-cdn-media.chatglm.cn/files/3117603b-7600-4b99-ba4a-a3739efbbff8.png?auth_key=1871525828-1c1cc756e0f840cdb811fe1ea9a7a32e-0-3f5d63ad396f854048a8dccab77a7e92" alt="شعار الشركة" class="company-logo">
+                <div class="header-title">
+                    <h1>مولد عروض السياحة - لوحة التحكم</h1>
+                    <p>شركة بوابات العالم للسفر والسياحة | تحكم كامل في العروض</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="save-record-btn">
+                    <i class="material-icons">save</i>
+                    حفظ السجل
+                </button>
+                <button class="btn btn-primary" id="download-offer-btn">
+                    <i class="material-icons">download</i>
+                    تحميل العرض
+                </button>
             </div>
         </div>
-        
-        <div class="content-wrapper">
-            <!-- Overview Cards -->
-            <div class="overview-cards">
-                <div class="info-card">
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <ul class="tabs">
+                <li class="tab active" data-tab="basic">
+                    <i class="material-icons">info</i>
+                    المعلومات الأساسية
+                </li>
+                <li class="tab" data-tab="flight">
+                    <i class="material-icons">flight_takeoff</i>
+                    معلومات الطيران
+                </li>
+                <li class="tab" data-tab="hotels">
+                    <i class="material-icons">hotel</i>
+                    الفنادق
+                </li>
+                <li class="tab" data-tab="program">
                     <i class="material-icons">calendar_today</i>
-                    <span class="info-label">تاريخ السفر</span>
-                    <span class="info-value">11 - 20 ديسمبر</span>
+                    البرنامج اليومي
+                </li>
+                <li class="tab" data-tab="car">
+                    <i class="material-icons">directions_car</i>
+                    استئجار سيارة
+                </li>
+                <li class="tab" data-tab="transport">
+                    <i class="material-icons">map</i>
+                    جدول التنقلات
+                </li>
+                <li class="tab" data-tab="package">
+                    <i class="material-icons">payments</i>
+                    الباقة والتكلفة
+                </li>
+            </ul>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Basic Info Tab -->
+            <div class="tab-content active" id="basic">
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="material-icons">image</i>
+                        صورة العرض الرئيسية
+                    </div>
+                    <div class="image-upload">
+                        <div class="image-preview" id="main-image-preview">
+                            <i class="material-icons" style="font-size: 2.25rem;">add_photo_alternate</i>
+                        </div>
+                        <div class="upload-buttons">
+                            <button class="upload-btn" onclick="document.getElementById('main-image-input').click()">
+                                <i class="material-icons">cloud_upload</i>
+                                رفع صورة جديدة
+                                <input type="file" id="main-image-input" accept="image/*" style="display: none;" onchange="previewImage(this, 'main-image-preview')">
+                            </button>
+                            <button class="upload-btn">
+                                <i class="material-icons">image</i>
+                                استخدام الصورة الافتراضية
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <i class="material-icons">bed</i>
-                    <span class="info-label">مدة الإقامة</span>
-                    <span class="info-value">9 ليالي</span>
-                </div>
-                <div class="info-card">
-                    <i class="material-icons">group</i>
-                    <span class="info-label">عدد الأفراد</span>
-                    <span class="info-value">4 أشخاص</span>
-                </div>
-                <div class="info-card">
-                    <i class="material-icons">stars</i>
-                    <span class="info-label">نوع البرنامج</span>
-                    <span class="info-value">برنامج خاص</span>
+
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="material-icons">person</i>
+                        معلومات العميل والرحلة
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>اسم العميل</label>
+                            <input type="text" id="client-name" value="الأستاذ بن غازي">
+                        </div>
+                        <div class="form-col">
+                            <label>رقم الجوال</label>
+                            <input type="text" id="client-phone" value="+966 5X XXX XXXX">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>الوجهة</label>
+                            <input type="text" id="destination" value="جورجيا">
+                        </div>
+                        <div class="form-col">
+                            <label>المدن</label>
+                            <input type="text" id="cities" value="تيبليسي، باكورياني، باتومي">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>تاريخ السفر</label>
+                            <input type="text" id="travel-date" value="11 - 20 ديسمبر 2024">
+                        </div>
+                        <div class="form-col">
+                            <label>عدد الليالي</label>
+                            <input type="number" id="nights-count" value="9">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>عدد البالغين</label>
+                            <input type="number" id="adults-count" value="4">
+                        </div>
+                        <div class="form-col">
+                            <label>عدد الأطفال</label>
+                            <input type="number" id="children-count" value="0">
+                        </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>مستوى البرنامج</label>
+                        <select id="program-level">
+                            <option value="special" selected>برنامج خاص VIP</option>
+                            <option value="premium">برنامج متميز</option>
+                            <option value="economy">برنامج اقتصادي</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- Flight Section -->
-            <div class="section">
-                <div class="section-header">
-                    <div class="section-icon"><i class="material-icons">flight_takeoff</i></div>
-                    <h3 class="section-title">تفاصيل الطيران</h3>
+            <!-- Flight Tab -->
+            <div class="tab-content" id="flight">
+                <div class="toggle-container">
+                    <span class="toggle-label">تفعيل قسم معلومات الطيران</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked id="flight-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
 
-                <div class="flight-card">
-                    <div class="flight-icon-box">
-                        <i class="material-icons">flight_takeoff</i>
-                    </div>
-                    <div class="flight-details">
-                        <div class="flight-main-info">
-                            <div class="flight-route">جدة ← تيبليسي</div>
-                            <div class="flight-date">11 ديسمبر 2024</div>
+                <div id="flights-container">
+                    <!-- Flight 1 - Default -->
+                    <div class="form-section flight-section" id="flight-section-0">
+                        <div class="section-title">
+                            <i class="material-icons">flight_takeoff</i>
+                            معلومات الرحلة
                         </div>
-                        <div class="flight-meta">
-                            <span><i class="material-icons" style="font-size:16px">business</i> فلاي ناس</span>
-                            <span><i class="material-icons" style="font-size:16px">schedule</i> 08:20 ص - 01:05 م</span>
-                            <span><i class="material-icons" style="font-size:16px">swap_horiz</i> مباشر</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flight-card">
-                    <div class="flight-icon-box">
-                        <i class="material-icons">flight_land</i>
-                    </div>
-                    <div class="flight-details">
-                        <div class="flight-main-info">
-                            <div class="flight-route">تيبليسي ← جدة</div>
-                            <div class="flight-date">20 ديسمبر 2024</div>
-                        </div>
-                        <div class="flight-meta">
-                            <span><i class="material-icons" style="font-size:16px">business</i> فلاي ناس</span>
-                            <span><i class="material-icons" style="font-size:16px">schedule</i> 01:55 م - 05:15 م</span>
-                            <span><i class="material-icons" style="font-size:16px">swap_horiz</i> مباشر</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="font-size: 13px; color: var(--text-muted); margin-top: 10px; display: flex; align-items: center; gap: 5px;">
-                    <i class="material-icons" style="font-size: 16px; color: var(--accent);">info</i>
-                    الرحلة تشمل الوزن و الأمتعة اليدوية و الضرائب كافة
-                </div>
-            </div>
-
-            <!-- Hotels Section -->
-            <div class="section">
-                <div class="section-header">
-                    <div class="section-icon"><i class="material-icons">hotel</i></div>
-                    <h3 class="section-title">الإقامة الفندقية</h3>
-                </div>
-                
-                <div class="hotels-grid">
-                    <div class="hotel-card">
-                        <img src="https://sfile.chatglm.cn/images-ppt/6c050ef476fb.jpg" alt="Hotel" class="hotel-image">
-                        <div class="hotel-content">
-                            <div class="hotel-dates">11 - 13 ديسمبر (ليلتين)</div>
-                            <div class="hotel-name">Gino Seaside Tbilisi</div>
-                            <div class="hotel-room">
-                                <i class="material-icons" style="font-size:16px">king_bed</i> غرفتين ثنائية
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>نوع الرحلة</label>
+                                <select class="flight-type">
+                                    <option value="outbound">رحلة ذهاب</option>
+                                    <option value="return">رحلة عودة</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label>صورة خطوط الطيران</label>
+                                <button class="upload-btn" onclick="document.getElementById('flight-airline-input-0').click()">
+                                    <i class="material-icons">cloud_upload</i>
+                                    إضافة صورة
+                                    <input type="file" id="flight-airline-input-0" accept="image/*" style="display: none;" onchange="previewImage(this, 'flight-airline-preview-0')">
+                                </button>
+                                <input type="hidden" id="flight-airline-preview-0">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="hotel-card">
-                        <img src="https://sfile.chatglm.cn/images-ppt/bc58b70cdd39.jpg" alt="Hotel" class="hotel-image">
-                        <div class="hotel-content">
-                            <div class="hotel-dates">13 - 15 ديسمبر (ليلتين)</div>
-                            <div class="hotel-name">Crystal Hotel & SPA Bakuriani</div>
-                            <div class="hotel-room">
-                                <i class="material-icons" style="font-size:16px">king_bed</i> غرفتين ثنائية
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>من</label>
+                                <input type="text" class="flight-from" value="جدة (JED)">
+                            </div>
+                            <div class="form-col">
+                                <label>إلى</label>
+                                <input type="text" class="flight-to" value="تيبليسي (TBS)">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="hotel-card">
-                        <img src="https://sfile.chatglm.cn/images-ppt/d163b7a42c08.jpg" alt="Hotel" class="hotel-image">
-                        <div class="hotel-content">
-                            <div class="hotel-dates">15 - 19 ديسمبر (4 ليالي)</div>
-                            <div class="hotel-name">Best Western Premier Batumi</div>
-                            <div class="hotel-room">
-                                <i class="material-icons" style="font-size:16px">king_bed</i> غرفتين ثنائية
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>التاريخ</label>
+                                <input type="text" class="flight-date" value="11 ديسمبر 2024">
+                            </div>
+                            <div class="form-col">
+                                <label>شركة الطيران</label>
+                                <input type="text" class="airline" value="فلاي ناس">
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="hotel-card">
-                        <img src="https://sfile.chatglm.cn/images-ppt/6c050ef476fb.jpg" alt="Hotel" class="hotel-image">
-                        <div class="hotel-content">
-                            <div class="hotel-dates">19 - 20 ديسمبر (ليلة)</div>
-                            <div class="hotel-name">Gino Seaside Tbilisi</div>
-                            <div class="hotel-room">
-                                <i class="material-icons" style="font-size:16px">king_bed</i> غرفتين ثنائية
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>وقت المغادرة</label>
+                                <input type="text" class="departure-time" value="08:20 ص">
+                            </div>
+                            <div class="form-col">
+                                <label>وقت الوصول</label>
+                                <input type="text" class="arrival-time" value="01:05 م">
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label>ملاحظات الرحلة</label>
+                            <input type="text" class="flight-notes" value="مباشر - تذاكر اقتصادية">
+                        </div>
+                        <button class="btn btn-remove" onclick="removeSection('flight-section-0', 'flights-container')">
+                            <i class="material-icons">delete</i>
+                            حذف هذه الرحلة
+                        </button>
                     </div>
                 </div>
+
+                <button class="btn btn-add" id="add-flight-btn">
+                    <i class="material-icons">add</i>
+                    إضافة رحلة طيران جديدة
+                </button>
             </div>
 
-            <!-- Itinerary Section -->
-            <div class="section">
-                <div class="section-header">
-                    <div class="section-icon"><i class="material-icons">map</i></div>
-                    <h3 class="section-title">البرنامج السياحي</h3>
+            <!-- Hotels Tab -->
+            <div class="tab-content" id="hotels">
+                <div class="toggle-container">
+                    <span class="toggle-label">تفعيل قسم الفنادق</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked id="hotels-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-day-title">
-                            <i class="material-icons" style="color:var(--accent)">location_on</i>
-                            اليوم الأول - الثاني: تيبليسي
-                        </div>
-                        <div class="timeline-content">
-                            <div class="activity-tag"><i class="material-icons">directions_car</i> الاستقبال والانتقال للفندق</div>
-                            <div class="activity-tag"><i class="material-icons">tour</i> جولة في المدينة القديمة والحمامات الكبريتية</div>
-                            <div class="activity-tag"><i class="material-icons">shopping_bag</i> استكشاف سوق ديدوبيلا</div>
-                        </div>
-                    </div>
 
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-day-title">
-                            <i class="material-icons" style="color:var(--accent)">location_on</i>
-                            اليوم الثالث - الرابع: باكورياني
+                <div id="hotels-container">
+                    <!-- Hotel 1 - Default -->
+                    <div class="form-section hotel-section" id="hotel-section-0">
+                        <div class="section-title">
+                            <i class="material-icons">hotel</i>
+                            معلومات الفندق
                         </div>
-                        <div class="timeline-content">
-                            <div class="activity-tag"><i class="material-icons">landscape</i> زيارة شلالات يالوفا</div>
-                            <div class="activity-tag"><i class="material-icons">hot_tub</i> الاستمتاع بالحمامات المعدنية</div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>صورة الفندق</label>
+                                <button class="upload-btn" onclick="document.getElementById('hotel-input-0').click()">
+                                    <i class="material-icons">cloud_upload</i>
+                                    إضافة صورة
+                                    <input type="file" id="hotel-input-0" accept="image/*" style="display: none;" onchange="previewImage(this, 'hotel-preview-0')">
+                                </button>
+                                <input type="hidden" id="hotel-preview-0">
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-day-title">
-                            <i class="material-icons" style="color:var(--accent)">location_on</i>
-                            اليوم الخامس - التاسع: باتومي
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>اسم الفندق</label>
+                                <input type="text" class="hotel-name" value="Gino Seaside Tbilisi">
+                            </div>
+                            <div class="form-col">
+                                <label>المدينة</label>
+                                <input type="text" class="hotel-city" value="تيبليسي">
+                            </div>
                         </div>
-                        <div class="timeline-content">
-                            <div class="activity-tag"><i class="material-icons">beach_access</i> جولة في شاطئ البحر الأسود</div>
-                            <div class="activity-tag"><i class="material-icons">city</i> زيارة برج ألفابيت والحدائق النباتية</div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>تاريخ الإقامة</label>
+                                <input type="text" class="hotel-dates" value="11 - 13 ديسمبر (ليلتين)">
+                            </div>
+                            <div class="form-col">
+                                <label>نوع الغرفة</label>
+                                <input type="text" class="room-type" value="غرفتين ثنائية">
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-day-title">
-                            <i class="material-icons" style="color:var(--accent)">flight_land</i>
-                            اليوم العاشر: العودة
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>الوجبات المرفقة</label>
+                                <input type="text" class="meals" value="فطور فقط">
+                            </div>
+                            <div class="form-col">
+                                <label>تقييم الفندق</label>
+                                <select class="hotel-rating">
+                                    <option value="3">3 نجوم</option>
+                                    <option value="4" selected>4 نجوم</option>
+                                    <option value="5">5 نجوم</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="timeline-content">
-                            <div class="activity-tag"><i class="material-icons">shopping_cart</i> تسوق للهدايا التذكارية</div>
-                            <div class="activity-tag"><i class="material-icons">luggage</i> التوجه للمطار</div>
+                        <div class="form-group">
+                            <label>ملاحظات الفندق</label>
+                            <textarea class="hotel-notes" rows="2">فندق 4 نجوم، يقع بالقرب من وسط المدينة القديمة</textarea>
                         </div>
+                        <button class="btn btn-remove" onclick="removeSection('hotel-section-0', 'hotels-container')">
+                            <i class="material-icons">delete</i>
+                            حذف هذا الفندق
+                        </button>
                     </div>
                 </div>
+
+                <button class="btn btn-add" id="add-hotel-btn">
+                    <i class="material-icons">add</i>
+                    إضافة فندق جديد
+                </button>
             </div>
 
-            <!-- Cost Section -->
-            <div class="section">
-                <div class="cost-card">
-                    <div class="total-label">التكلفة الإجمالية للرحلة</div>
-                    <div class="total-amount">15,665 ريال</div>
-                    <div class="discount-badge">شامل خصم اليوم الوطني والتعامل الأول</div>
+            <!-- Program Tab -->
+            <div class="tab-content" id="program">
+                <div class="toggle-container">
+                    <span class="toggle-label">تفعيل قسم البرنامج اليومي</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked id="program-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <div style="text-align: center; color: var(--text-muted); font-size: 14px;">
-                    منسق العرض: <strong style="color: var(--primary);">جمال</strong>، استشاري قسم الحجوزات
+
+                <div id="program-container">
+                    <!-- Program 1 - Default -->
+                    <div class="form-section program-section" id="program-section-0">
+                        <div class="section-title">
+                            <i class="material-icons">looks_one</i>
+                            معلومات البرنامج
+                        </div>
+                        <div class="form-group">
+                            <label>عنوان اليوم/الأيام</label>
+                            <input type="text" class="program-title" value="اليوم الأول - الثاني: تيبليسي">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>النشاط 1</label>
+                                <input type="text" class="activity" value="الاستقبال والانتقال للفندق">
+                            </div>
+                            <div class="form-col">
+                                <label>النشاط 2</label>
+                                <input type="text" class="activity" value="جولة في المدينة القديمة">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>النشاط 3</label>
+                                <input type="text" class="activity" value="الحمامات الكبريتية">
+                            </div>
+                            <div class="form-col">
+                                <label>النشاط 4</label>
+                                <input type="text" class="activity" value="استكشاف سوق ديدوبيلا">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>ملاحظات</label>
+                            <textarea class="program-notes" rows="2">يرجى إحضار ملابس مريحة للمشي</textarea>
+                        </div>
+                        <button class="btn btn-remove" onclick="removeSection('program-section-0', 'program-container')">
+                            <i class="material-icons">delete</i>
+                            حذف هذا البرنامج
+                        </button>
+                    </div>
                 </div>
+
+                <button class="btn btn-add" id="add-program-btn">
+                    <i class="material-icons">add</i>
+                    إضافة برنامج يومي جديد
+                </button>
             </div>
 
-            <!-- Includes/Excludes -->
-            <div class="section">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div style="background: rgba(26, 37, 54, 0.05); padding: 20px; border-radius: 16px;">
-                        <h4 style="color: var(--primary); margin-bottom: 15px; display:flex; align-items:center; gap:8px;">
-                            <i class="material-icons">check_circle</i> الباقة تشمل
-                        </h4>
-                        <ul style="list-style:none; font-size:13px; color:var(--text-dark);">
-                            <li style="margin-bottom:8px; display:flex; gap:8px;"><i class="material-icons" style="font-size:14px; color:var(--primary);">check</i> الطيران الدولي</li>
-                            <li style="margin-bottom:8px; display:flex; gap:8px;"><i class="material-icons" style="font-size:14px; color:var(--primary);">check</i> الاستقبال والتوديع</li>
-                            <li style="margin-bottom:8px; display:flex; gap:8px;"><i class="material-icons" style="font-size:14px; color:var(--primary);">check</i> التنقلات بسيارة خاصة</li>
-                            <li style="margin-bottom:8px; display:flex; gap:8px;"><i class="material-icons" style="font-size:14px; color:var(--primary);">check</i> إقامة 9 ليالي مع الفطور</li>
-                        </ul>
-                    </div>
-                    <div style="background: rgba(255, 107, 53, 0.05); padding: 20px; border-radius: 16px;">
-                        <h4 style="color: var(--accent); margin-bottom: 15px; display:flex; align-items:center; gap:8px;">
-                            <i class="material-icons">cancel</i> الباقة لا تشمل
-                        </h4>
-                        <ul style="list-style:none; font-size:13px; color:var(--text-dark);">
-                            <li style="margin-bottom:8px; display:flex; gap:8px;"><i class="material-icons" style="font-size:14px; color:var(--accent);">close</i> الغداء والعشاء</li>
-                            <li style="margin-bottom:8px; display:flex; gap:8px;"><i class="material-icons" style="font-size:14px; color:var(--accent);">close</i> تذاكر الأماكن السياحية</li>
-                            <li style="margin-bottom:8px; display:flex; gap:8px;"><i class="material-icons" style="font-size:14px; color:var(--accent);">close</i> الأنشطة الاختيارية</li>
-                        </ul>
+            <!-- Car Tab -->
+            <div class="tab-content" id="car">
+                <div class="toggle-container">
+                    <span class="toggle-label">تفعيل قسم استئجار السيارة</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="car-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div id="car-container">
+                    <!-- Car 1 - Default -->
+                    <div class="form-section car-section" id="car-section-0">
+                        <div class="section-title">
+                            <i class="material-icons">directions_car</i>
+                            معلومات استئجار السيارة
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>نوع السيارة</label>
+                                <input type="text" class="car-type" value="تويوتا كامري 2024">
+                            </div>
+                            <div class="form-col">
+                                <label>تاريخ الاستئجار</label>
+                                <input type="text" class="rental-dates" value="11 - 20 ديسمبر 2024">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>التأمين الشامل</label>
+                                <select class="insurance">
+                                    <option value="yes" selected>نعم</option>
+                                    <option value="no">لا</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label>سائق إضافي</label>
+                                <select class="additional-driver">
+                                    <option value="yes">نعم</option>
+                                    <option value="no" selected>لا</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>ملاحظات</label>
+                            <textarea class="car-notes" rows="2">التسليم والاستلام في المطار</textarea>
+                        </div>
+                        <button class="btn btn-remove" onclick="removeSection('car-section-0', 'car-container')">
+                            <i class="material-icons">delete</i>
+                            حذف هذه السيارة
+                        </button>
                     </div>
                 </div>
+
+                <button class="btn btn-add" id="add-car-btn">
+                    <i class="material-icons">add</i>
+                    إضافة سيارة جديدة
+                </button>
             </div>
 
-            <!-- Payment Methods -->
-            <div class="section">
-                <div class="section-header">
-                    <div class="section-icon"><i class="material-icons">account_balance_wallet</i></div>
-                    <h3 class="section-title">طرق الدفع والحسابات البنكية</h3>
+            <!-- Transport Tab -->
+            <div class="tab-content" id="transport">
+                <div class="toggle-container">
+                    <span class="toggle-label">تفعيل قسم جدول التنقلات</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked id="transport-toggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
 
-                <div class="payment-grid">
-                    <div class="payment-item"><i class="material-icons">payment</i> فيزا</div>
-                    <div class="payment-item"><i class="material-icons">credit_card</i> ماستر كارد</div>
-                    <div class="payment-item"><i class="material-icons">account_balance</i> مدى</div>
-                    <div class="payment-item"><i class="material-icons">payment</i> تابي / تمارا</div>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <!-- بنك الراجحي -->
-                    <div class="bank-card">
-                        <div class="bank-header"><i class="material-icons" style="margin-left:8px;">account_balance</i> بنك الراجحي</div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">رقم الحساب</span>
-                            <span class="bank-info-value">5876080452853</span>
+                <div id="transport-container">
+                    <!-- Transport 1 - Default -->
+                    <div class="form-section transport-section" id="transport-section-0">
+                        <div class="section-title">
+                            <i class="material-icons">map</i>
+                            معلومات التنقل
                         </div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">الآيبان</span>
-                            <span class="bank-info-value">SA5680000587608010452853</span>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>من</label>
+                                <input type="text" class="transport-from" value="مطار تيبليسي">
+                            </div>
+                            <div class="form-col">
+                                <label>إلى</label>
+                                <input type="text" class="transport-to" value="فندق Gino Seaside">
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- البنك الأهلي -->
-                    <div class="bank-card">
-                        <div class="bank-header"><i class="material-icons" style="margin-left:8px;">account_balance</i> البنك الأهلي (SNB)</div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">رقم الحساب</span>
-                            <span class="bank-info-value">01400019666903</span>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>التاريخ</label>
+                                <input type="text" class="transport-date" value="11 ديسمبر 2024">
+                            </div>
+                            <div class="form-col">
+                                <label>الوقت</label>
+                                <input type="text" class="transport-time" value="01:30 م">
+                            </div>
                         </div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">الآيبان</span>
-                            <span class="bank-info-value">SA2910000001400019666903</span>
+                        <div class="form-group">
+                            <label>نوع النقل</label>
+                            <input type="text" class="transport-type" value="سيارة خاصة">
                         </div>
-                    </div>
-
-                    <!-- بنك البلاد -->
-                    <div class="bank-card">
-                        <div class="bank-header"><i class="material-icons" style="margin-left:8px;">account_balance</i> بنك البلاد</div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">رقم الحساب</span>
-                            <span class="bank-info-value">722140112730002</span>
-                        </div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">الآيبان</span>
-                            <span class="bank-info-value">SA9115000722140112730002</span>
-                        </div>
-                    </div>
-
-                    <!-- بنك SAB -->
-                    <div class="bank-card">
-                        <div class="bank-header"><i class="material-icons" style="margin-left:8px;">account_balance</i> بنك SAB</div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">رقم الحساب</span>
-                            <span class="bank-info-value">262342454001</span>
-                        </div>
-                        <div class="bank-info-row">
-                            <span class="bank-info-label">الآيبان</span>
-                            <span class="bank-info-value">SA0645000000262342454001</span>
-                        </div>
-                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; font-size: 13px; color: var(--primary); font-weight: 600;">
-                            المستفيد: بوابات العالم للسفر والسياحة
-                        </div>
+                        <button class="btn btn-remove" onclick="removeSection('transport-section-0', 'transport-container')">
+                            <i class="material-icons">delete</i>
+                            حذف هذا التنقل
+                        </button>
                     </div>
                 </div>
+
+                <button class="btn btn-add" id="add-transport-btn">
+                    <i class="material-icons">add</i>
+                    إضافة تنقل جديد
+                </button>
             </div>
 
-            <!-- Terms -->
-            <div class="section" style="background: #FFF5F5; padding: 20px; border-radius: 16px; border-right: 4px solid var(--accent);">
-                <h4 style="color: #C53030; margin-bottom: 10px; display:flex; align-items:center; gap:8px;">
-                    <i class="material-icons">warning</i> تنبيه هام - الشروط والأحكام
-                </h4>
-                <ul class="terms-list" style="padding-right: 0; list-style: none;">
-                    <li>الحجز غير قابل للإلغاء أو التعديل (المبلغ بالكامل غير مسترد)</li>
-                    <li>الشركة غير مسئولة عن تصاريح السفر وتأشيرات الخروج والعودة</li>
-                    <li>قد تتغير الأسعار والإمكانية وفقًا لتاريخ السفر المطلوب</li>
-                    <li>يرجى الحضور للمطار قبل 3 ساعات من موعد السفر</li>
-                </ul>
+            <!-- Package Tab -->
+            <div class="tab-content" id="package">
+                <div id="package-container">
+                    <!-- Package 1 - Default -->
+                    <div class="form-section package-section" id="package-section-0">
+                        <div class="section-title">
+                            <i class="material-icons">payments</i>
+                            تفاصيل الباقة/الخدمة
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>اسم الباقة/الخدمة</label>
+                                <input type="text" class="package-name" value="الباقة السياحية الكاملة">
+                            </div>
+                            <div class="form-col">
+                                <label>الوصف</label>
+                                <input type="text" class="package-description" value="تشمل جميع الخدمات السياحية">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>السعر</label>
+                                <input type="number" class="package-price" value="3500">
+                            </div>
+                            <div class="form-col">
+                                <label>العملة</label>
+                                <select class="package-currency">
+                                    <option value="SAR" selected>ريال سعودي</option>
+                                    <option value="USD">دولار أمريكي</option>
+                                    <option value="EUR">يورو</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>ملاحظات</label>
+                            <textarea class="package-notes" rows="2">السعر للشخص الواحد</textarea>
+                        </div>
+                        <button class="btn btn-remove" onclick="removeSection('package-section-0', 'package-container')">
+                            <i class="material-icons">delete</i>
+                            حذف هذه الباقة
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn btn-add" id="add-package-btn">
+                    <i class="material-icons">add</i>
+                    إضافة باقة/خدمة جديدة
+                </button>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <div class="footer-logo">
-                <img src="https://z-cdn-media.chatglm.cn/files/5054d39c-ea32-4a6a-849f-54e4fbcb8612.png?auth_key=1870906253-ab0e3e46b2ee4b17b7a958fea3f201e2-0-923120d55ccde393668a4f0c066784c9" alt="World Gates">
+            <div>
+                <p>© 2024 شركة بوابات العالم للسفر والسياحة. جميع الحقوق محفوظة.</p>
+                <div class="payment-methods">
+                    <span class="payment-badge">Visa</span>
+                    <span class="payment-badge">Mastercard</span>
+                    <span class="payment-badge">Mada</span>
+                    <span class="payment-badge">Apple Pay</span>
+                </div>
             </div>
-            <p>بوابات العالم للسفر والسياحة</p>
-            <p style="font-size: 12px; color: #999;">World Gates For Travel & Tourism</p>
+            <div>
+                <p>الإصدار 1.0.0</p>
+            </div>
         </div>
     </div>
+
+    <!-- Offer Template (Hidden, used for PDF generation) -->
+    <div class="offer-template" id="offer-template">
+        <!-- Header -->
+        <div class="offer-header">
+            <img src="https://images.unsplash.com/photo-1568781269783-e69b164ad26e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Georgia" class="offer-header-bg">
+            <div class="offer-header-overlay"></div>
+            
+            <div class="brand-badge">
+                <img src="https://z-cdn-media.chatglm.cn/files/3117603b-7600-4b99-ba4a-a3739efbbff8.png?auth_key=1871525828-1c1cc756e0f840cdb811fe1ea9a7a32e-0-3f5d63ad396f854048a8dccab77a7e92" alt="شعار الشركة">
+                <span>بوابات العالم للسفر والسياحة</span>
+            </div>
+            
+            <div class="offer-header-content">
+                <div class="tag-pill">برنامج خاص VIP</div>
+                <h1 class="offer-title">اكتشف جمال جورجيا</h1>
+                <p class="offer-subtitle">رحلة استثنائية إلى أجمل مدن جورجيا: تيبليسي، باكورياني، باتومي</p>
+            </div>
+        </div>
+        
+        <!-- Content Wrapper -->
+        <div class="offer-content-wrapper">
+            <!-- Overview Cards -->
+            <div class="overview-cards">
+                <div class="info-card">
+                    <i class="material-icons">calendar_today</i>
+                    <span class="info-label">المدة</span>
+                    <span class="info-value">9 ليالي</span>
+                </div>
+                <div class="info-card">
+                    <i class="material-icons">location_on</i>
+                    <span class="info-label">الوجهة</span>
+                    <span class="info-value">جورجيا</span>
+                </div>
+                <div class="info-card">
+                    <i class="material-icons">people</i>
+                    <span class="info-label">المسافرون</span>
+                    <span class="info-value">4 بالغين</span>
+                </div>
+                <div class="info-card">
+                    <i class="material-icons">flight_takeoff</i>
+                    <span class="info-label">التاريخ</span>
+                    <span class="info-value">11-20 ديسمبر</span>
+                </div>
+            </div>
+            
+            <!-- Flight Section -->
+            <div class="offer-section" id="pdf-flights-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">flight</i>
+                    </div>
+                    <h3 class="section-title">معلومات الطيران</h3>
+                </div>
+                
+                <div id="pdf-flights-container">
+                    <!-- Flights will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Hotels Section -->
+            <div class="offer-section" id="pdf-hotels-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">hotel</i>
+                    </div>
+                    <h3 class="section-title">الإقامة الفندقية</h3>
+                </div>
+                
+                <div class="hotels-grid" id="pdf-hotels-container">
+                    <!-- Hotels will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Program Section -->
+            <div class="offer-section" id="pdf-program-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">calendar_today</i>
+                    </div>
+                    <h3 class="section-title">البرنامج اليومي</h3>
+                </div>
+                
+                <div class="timeline" id="pdf-program-container">
+                    <!-- Programs will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Transport Section -->
+            <div class="offer-section" id="pdf-transport-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">map</i>
+                    </div>
+                    <h3 class="section-title">جدول التنقلات</h3>
+                </div>
+                
+                <table class="transfers-table">
+                    <thead>
+                        <tr>
+                            <th>من</th>
+                            <th>إلى</th>
+                            <th>التاريخ</th>
+                            <th>الوقت</th>
+                            <th>نوع النقل</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdf-transport-container">
+                        <!-- Transport items will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Car Section -->
+            <div class="offer-section" id="pdf-car-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">directions_car</i>
+                    </div>
+                    <h3 class="section-title">استئجار سيارة</h3>
+                </div>
+                
+                <div id="pdf-car-container">
+                    <!-- Car information will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Cost Summary Section -->
+            <div class="offer-section" id="pdf-cost-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">account_balance_wallet</i>
+                    </div>
+                    <h3 class="section-title">تفاصيل التكلفة</h3>
+                </div>
+                
+                <div id="pdf-package-container">
+                    <!-- Packages will be dynamically added here as a summary table -->
+                </div>
+                
+                <div class="cost-card">
+                    <p class="total-label">الإجمالي النهائي</p>
+                    <h2 class="total-amount" id="pdf-total-amount">12,600 ر.س</h2>
+                    <span class="discount-badge">شامل جميع الخدمات</span>
+                </div>
+                
+                <div class="bank-card">
+                    <div class="bank-header">
+                        <i class="material-icons" style="margin-left: 0.5rem;">account_balance</i>
+                        معلومات التحويل البنكي
+                    </div>
+                    <div class="bank-info-row">
+                        <span class="bank-info-label">البنك:</span>
+                        <span class="bank-info-value">البنك الأهلي التجاري</span>
+                    </div>
+                    <div class="bank-info-row">
+                        <span class="bank-info-label">رقم الحساب (IBAN):</span>
+                        <span class="bank-info-value">SA1234567890123456789012</span>
+                    </div>
+                    <div class="bank-info-row">
+                        <span class="bank-info-label">اسم المستفيد:</span>
+                        <span class="bank-info-value">شركة بوابات العالم للسفر والسياحة</span>
+                    </div>
+                </div>
+                
+                <div class="payment-grid">
+                    <div class="payment-item">
+                        <i class="material-icons">credit_card</i>
+                        <span>Visa</span>
+                    </div>
+                    <div class="payment-item">
+                        <i class="material-icons">credit_card</i>
+                        <span>Mastercard</span>
+                    </div>
+                    <div class="payment-item">
+                        <i class="material-icons">payment</i>
+                        <span>Mada</span>
+                    </div>
+                    <div class="payment-item">
+                        <i class="material-icons">apple</i>
+                        <span>Apple Pay</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Policies Section -->
+            <div class="offer-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="material-icons">policy</i>
+                    </div>
+                    <h3 class="section-title">الشروط والأحكام</h3>
+                </div>
+                
+                <div class="policies-grid">
+                    <div class="policy-card">
+                        <div class="policy-header">
+                            <i class="material-icons">cancel</i>
+                            <h4>سياسة الإلغاء</h4>
+                        </div>
+                        <div class="policy-body">
+                            <ul class="policy-list">
+                                <li>إلغاء قبل 30 يوماً من السفر: استرداد كامل</li>
+                                <li>إلغاء قبل 15 يوماً من السفر: استرداد 50%</li>
+                                <li>إلغاء قبل أقل من 15 يوماً: لا يوجد استرداد</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="policy-card">
+                        <div class="policy-header">
+                            <i class="material-icons">info</i>
+                            <h4>ملاحظات هامة</h4>
+                        </div>
+                        <div class="policy-body">
+                            <ul class="policy-list">
+                                <li>يجب على المسافرين حمل جوازات سفر سارية المفعول لمدة 6 أشهر على الأقل</li>
+                                <li>الأسعار قابلة للتغيير حسب توفر الأماكن</li>
+                                <li>الشركة غير مسؤولة عن أي تأخير في الرحلات الجوية</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="offer-footer">
+            <div class="footer-logo">
+                <img src="https://z-cdn-media.chatglm.cn/files/3117603b-7600-4b99-ba4a-a3739efbbff8.png?auth_key=1871525828-1c1cc756e0f840cdb811fe1ea9a7a32e-0-3f5d63ad396f854048a8dccab77a7e92" alt="شعار الشركة">
+            </div>
+            <p>شكراً لاختياركم شركة بوابات العالم للسفر والسياحة</p>
+            <p style="margin-top: 0.5rem;">اتصل بنا: +966 XX XXX XXXX | info@worldgatestravel.com</p>
+            <ul class="terms-list" style="list-style: none; margin-top: 1.5rem; text-align: center;">
+                <li>© 2024 شركة بوابات العالم للسفر والسياحة. جميع الحقوق محفوظة.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">تم حفظ السجل بنجاح!</div>
+
+    <script>
+        // Global counters for sections
+        let flightCount = 1;
+        let hotelCount = 1;
+        let programCount = 1;
+        let carCount = 1;
+        let transportCount = 1;
+        let packageCount = 1;
+
+        // Tab Navigation
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Toggle Sections
+        const toggles = document.querySelectorAll('.toggle-switch input');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const sectionId = this.id.replace('-toggle', '');
+                const container = document.getElementById(sectionId + '-container') || 
+                                  document.getElementById(sectionId + '-table') ||
+                                  document.getElementById(sectionId);
+                if (container) {
+                    container.style.display = this.checked ? 'block' : 'none';
+                }
+            });
+        });
+        
+        // Image Preview
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById(previewId);
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Save Record Button
+        document.getElementById('save-record-btn').addEventListener('click', function() {
+            showToast('تم حفظ السجل بنجاح!');
+        });
+
+        // Function to add a new section
+        function addSection(sectionType) {
+            let sectionId, containerId, template;
+            
+            switch(sectionType) {
+                case 'flight':
+                    sectionId = `flight-section-${flightCount}`;
+                    containerId = 'flights-container';
+                    template = `
+                        <div class="form-section flight-section" id="${sectionId}">
+                            <div class="section-title">
+                                <i class="material-icons">flight_takeoff</i>
+                                معلومات الرحلة
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>نوع الرحلة</label>
+                                    <select class="flight-type">
+                                        <option value="outbound">رحلة ذهاب</option>
+                                        <option value="return">رحلة عودة</option>
+                                    </select>
+                                </div>
+                                <div class="form-col">
+                                    <label>صورة خطوط الطيران</label>
+                                    <button class="upload-btn" onclick="document.getElementById('flight-airline-input-${flightCount}').click()">
+                                        <i class="material-icons">cloud_upload</i>
+                                        إضافة صورة
+                                        <input type="file" id="flight-airline-input-${flightCount}" accept="image/*" style="display: none;" onchange="previewImage(this, 'flight-airline-preview-${flightCount}')">
+                                    </button>
+                                    <input type="hidden" id="flight-airline-preview-${flightCount}">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>من</label>
+                                    <input type="text" class="flight-from" placeholder="مثال: جدة (JED)">
+                                </div>
+                                <div class="form-col">
+                                    <label>إلى</label>
+                                    <input type="text" class="flight-to" placeholder="مثال: تيبليسي (TBS)">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>التاريخ</label>
+                                    <input type="text" class="flight-date" placeholder="مثال: 11 ديسمبر 2024">
+                                </div>
+                                <div class="form-col">
+                                    <label>شركة الطيران</label>
+                                    <input type="text" class="airline" placeholder="مثال: فلاي ناس">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>وقت المغادرة</label>
+                                    <input type="text" class="departure-time" placeholder="مثال: 08:20 ص">
+                                </div>
+                                <div class="form-col">
+                                    <label>وقت الوصول</label>
+                                    <input type="text" class="arrival-time" placeholder="مثال: 01:05 م">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>ملاحظات الرحلة</label>
+                                <input type="text" class="flight-notes" placeholder="مثال: مباشر - تذاكر اقتصادية">
+                            </div>
+                            <button class="btn btn-remove" onclick="removeSection('${sectionId}', '${containerId}')">
+                                <i class="material-icons">delete</i>
+                                حذف هذه الرحلة
+                            </button>
+                        </div>
+                    `;
+                    flightCount++;
+                    break;
+                    
+                case 'hotel':
+                    sectionId = `hotel-section-${hotelCount}`;
+                    containerId = 'hotels-container';
+                    template = `
+                        <div class="form-section hotel-section" id="${sectionId}">
+                            <div class="section-title">
+                                <i class="material-icons">hotel</i>
+                                معلومات الفندق
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>صورة الفندق</label>
+                                    <button class="upload-btn" onclick="document.getElementById('hotel-input-${hotelCount}').click()">
+                                        <i class="material-icons">cloud_upload</i>
+                                        إضافة صورة
+                                        <input type="file" id="hotel-input-${hotelCount}" accept="image/*" style="display: none;" onchange="previewImage(this, 'hotel-preview-${hotelCount}')">
+                                    </button>
+                                    <input type="hidden" id="hotel-preview-${hotelCount}">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>اسم الفندق</label>
+                                    <input type="text" class="hotel-name" placeholder="مثال: Gino Seaside Tbilisi">
+                                </div>
+                                <div class="form-col">
+                                    <label>المدينة</label>
+                                    <input type="text" class="hotel-city" placeholder="مثال: تيبليسي">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>تاريخ الإقامة</label>
+                                    <input type="text" class="hotel-dates" placeholder="مثال: 11 - 13 ديسمبر (ليلتين)">
+                                </div>
+                                <div class="form-col">
+                                    <label>نوع الغرفة</label>
+                                    <input type="text" class="room-type" placeholder="مثال: غرفتين ثنائية">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>الوجبات المرفقة</label>
+                                    <input type="text" class="meals" placeholder="مثال: فطور فقط">
+                                </div>
+                                <div class="form-col">
+                                    <label>تقييم الفندق</label>
+                                    <select class="hotel-rating">
+                                        <option value="3">3 نجوم</option>
+                                        <option value="4" selected>4 نجوم</option>
+                                        <option value="5">5 نجوم</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>ملاحظات الفندق</label>
+                                <textarea class="hotel-notes" rows="2" placeholder="مثال: فندق 4 نجوم، يقع بالقرب من وسط المدينة القديمة"></textarea>
+                            </div>
+                            <button class="btn btn-remove" onclick="removeSection('${sectionId}', '${containerId}')">
+                                <i class="material-icons">delete</i>
+                                حذف هذا الفندق
+                            </button>
+                        </div>
+                    `;
+                    hotelCount++;
+                    break;
+                    
+                case 'program':
+                    sectionId = `program-section-${programCount}`;
+                    containerId = 'program-container';
+                    template = `
+                        <div class="form-section program-section" id="${sectionId}">
+                            <div class="section-title">
+                                <i class="material-icons">looks_one</i>
+                                معلومات البرنامج
+                            </div>
+                            <div class="form-group">
+                                <label>عنوان اليوم/الأيام</label>
+                                <input type="text" class="program-title" placeholder="مثال: اليوم الأول - الثاني: تيبليسي">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>النشاط 1</label>
+                                    <input type="text" class="activity" placeholder="مثال: الاستقبال والانتقال للفندق">
+                                </div>
+                                <div class="form-col">
+                                    <label>النشاط 2</label>
+                                    <input type="text" class="activity" placeholder="مثال: جولة في المدينة القديمة">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>النشاط 3</label>
+                                    <input type="text" class="activity" placeholder="مثال: الحمامات الكبريتية">
+                                </div>
+                                <div class="form-col">
+                                    <label>النشاط 4</label>
+                                    <input type="text" class="activity" placeholder="مثال: استكشاف سوق ديدوبيلا">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>ملاحظات</label>
+                                <textarea class="program-notes" rows="2" placeholder="مثال: يرجى إحضار ملابس مريحة للمشي"></textarea>
+                            </div>
+                            <button class="btn btn-remove" onclick="removeSection('${sectionId}', '${containerId}')">
+                                <i class="material-icons">delete</i>
+                                حذف هذا البرنامج
+                            </button>
+                        </div>
+                    `;
+                    programCount++;
+                    break;
+                    
+                case 'car':
+                    sectionId = `car-section-${carCount}`;
+                    containerId = 'car-container';
+                    template = `
+                        <div class="form-section car-section" id="${sectionId}">
+                            <div class="section-title">
+                                <i class="material-icons">directions_car</i>
+                                معلومات استئجار السيارة
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>نوع السيارة</label>
+                                    <input type="text" class="car-type" placeholder="مثال: تويوتا كامري 2024">
+                                </div>
+                                <div class="form-col">
+                                    <label>تاريخ الاستئجار</label>
+                                    <input type="text" class="rental-dates" placeholder="مثال: 11 - 20 ديسمبر 2024">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>التأمين الشامل</label>
+                                    <select class="insurance">
+                                        <option value="yes" selected>نعم</option>
+                                        <option value="no">لا</option>
+                                    </select>
+                                </div>
+                                <div class="form-col">
+                                    <label>سائق إضافي</label>
+                                    <select class="additional-driver">
+                                        <option value="yes">نعم</option>
+                                        <option value="no" selected>لا</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>ملاحظات</label>
+                                <textarea class="car-notes" rows="2" placeholder="مثال: التسليم والاستلام في المطار"></textarea>
+                            </div>
+                            <button class="btn btn-remove" onclick="removeSection('${sectionId}', '${containerId}')">
+                                <i class="material-icons">delete</i>
+                                حذف هذه السيارة
+                            </button>
+                        </div>
+                    `;
+                    carCount++;
+                    break;
+                    
+                case 'transport':
+                    sectionId = `transport-section-${transportCount}`;
+                    containerId = 'transport-container';
+                    template = `
+                        <div class="form-section transport-section" id="${sectionId}">
+                            <div class="section-title">
+                                <i class="material-icons">map</i>
+                                معلومات التنقل
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>من</label>
+                                    <input type="text" class="transport-from" placeholder="مثال: مطار تيبليسي">
+                                </div>
+                                <div class="form-col">
+                                    <label>إلى</label>
+                                    <input type="text" class="transport-to" placeholder="مثال: فندق Gino Seaside">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>التاريخ</label>
+                                    <input type="text" class="transport-date" placeholder="مثال: 11 ديسمبر 2024">
+                                </div>
+                                <div class="form-col">
+                                    <label>الوقت</label>
+                                    <input type="text" class="transport-time" placeholder="مثال: 01:30 م">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>نوع النقل</label>
+                                <input type="text" class="transport-type" placeholder="مثال: سيارة خاصة">
+                            </div>
+                            <button class="btn btn-remove" onclick="removeSection('${sectionId}', '${containerId}')">
+                                <i class="material-icons">delete</i>
+                                حذف هذا التنقل
+                            </button>
+                        </div>
+                    `;
+                    transportCount++;
+                    break;
+                    
+                case 'package':
+                    sectionId = `package-section-${packageCount}`;
+                    containerId = 'package-container';
+                    template = `
+                        <div class="form-section package-section" id="${sectionId}">
+                            <div class="section-title">
+                                <i class="material-icons">payments</i>
+                                تفاصيل الباقة/الخدمة
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>اسم الباقة/الخدمة</label>
+                                    <input type="text" class="package-name" placeholder="مثال: الباقة السياحية الكاملة">
+                                </div>
+                                <div class="form-col">
+                                    <label>الوصف</label>
+                                    <input type="text" class="package-description" placeholder="مثال: تشمل جميع الخدمات السياحية">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <label>السعر</label>
+                                    <input type="number" class="package-price" placeholder="مثال: 3500">
+                                </div>
+                                <div class="form-col">
+                                    <label>العملة</label>
+                                    <select class="package-currency">
+                                        <option value="SAR" selected>ريال سعودي</option>
+                                        <option value="USD">دولار أمريكي</option>
+                                        <option value="EUR">يورو</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>ملاحظات</label>
+                                <textarea class="package-notes" rows="2" placeholder="مثال: السعر للشخص الواحد"></textarea>
+                            </div>
+                            <button class="btn btn-remove" onclick="removeSection('${sectionId}', '${containerId}')">
+                                <i class="class="material-icons">delete</i>
+                                حذف هذه الباقة
+                            </button>
+                        </div>
+                    `;
+                    packageCount++;
+                    break;
+            }
+            
+            // Add the new section to the container
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.innerHTML = template;
+            container.appendChild(div.firstElementChild);
+            
+            // Show success message
+            showToast(`تم إضافة ${getSectionName(sectionType)} جديد بنجاح!`);
+        }
+        
+        // Function to get the section name in Arabic
+        function getSectionName(sectionType) {
+            switch(sectionType) {
+                case 'flight': return 'رحلة';
+                case 'hotel': return 'فندق';
+                case 'program': return 'برنامج';
+                case 'car': return 'سيارة';
+                case 'transport': return 'تنقل';
+                case 'package': return 'باقة';
+                default: return 'قسم';
+            }
+        }
+        
+        // Function to remove a section
+        function removeSection(sectionId, containerId) {
+            const section = document.getElementById(sectionId);
+            const container = document.getElementById(containerId);
+            
+            if (container.children.length > 1) {
+                container.removeChild(section);
+                showToast('تم حذف القسم بنجاح!');
+            } else {
+                showToast('لا يمكن حذف القسم الأخير!');
+            }
+        }
+        
+        // Add event listeners for add buttons
+        document.getElementById('add-flight-btn').addEventListener('click', () => addSection('flight'));
+        document.getElementById('add-hotel-btn').addEventListener('click', () => addSection('hotel'));
+        document.getElementById('add-program-btn').addEventListener('click', () => addSection('program'));
+        document.getElementById('add-car-btn').addEventListener('click', () => addSection('car'));
+        document.getElementById('add-transport-btn').addEventListener('click', () => addSection('transport'));
+        document.getElementById('add-package-btn').addEventListener('click', () => addSection('package'));
+
+        // Function to collect data from form sections
+        function collectSectionData(sectionType) {
+            const data = [];
+            let containerId, itemClass;
+            
+            switch(sectionType) {
+                case 'flight':
+                    containerId = 'flights-container';
+                    itemClass = 'flight-section';
+                    break;
+                case 'hotel':
+                    containerId = 'hotels-container';
+                    itemClass = 'hotel-section';
+                    break;
+                case 'program':
+                    containerId = 'program-container';
+                    itemClass = 'program-section';
+                    break;
+                case 'car':
+                    containerId = 'car-container';
+                    itemClass = 'car-section';
+                    break;
+                case 'transport':
+                    containerId = 'transport-container';
+                    itemClass = 'transport-section';
+                    break;
+                case 'package':
+                    containerId = 'package-container';
+                    itemClass = 'package-section';
+                    break;
+            }
+            
+            const container = document.getElementById(containerId);
+            const sections = container.querySelectorAll(`.${itemClass}`);
+            
+            sections.forEach(section => {
+                const itemData = {};
+                
+                if (sectionType === 'flight') {
+                    itemData.type = section.querySelector('.flight-type').value;
+                    itemData.from = section.querySelector('.flight-from').value;
+                    itemData.to = section.querySelector('.flight-to').value;
+                    itemData.date = section.querySelector('.flight-date').value;
+                    itemData.airline = section.querySelector('.airline').value;
+                    itemData.departureTime = section.querySelector('.departure-time').value;
+                    itemData.arrivalTime = section.querySelector('.arrival-time').value;
+                    itemData.notes = section.querySelector('.flight-notes').value;
+                } else if (sectionType === 'hotel') {
+                    itemData.name = section.querySelector('.hotel-name').value;
+                    itemData.city = section.querySelector('.hotel-city').value;
+                    itemData.dates = section.querySelector('.hotel-dates').value;
+                    itemData.roomType = section.querySelector('.room-type').value;
+                    itemData.meals = section.querySelector('.meals').value;
+                    itemData.rating = section.querySelector('.hotel-rating').value;
+                    itemData.notes = section.querySelector('.hotel-notes').value;
+                } else if (sectionType === 'program') {
+                    itemData.title = section.querySelector('.program-title').value;
+                    const activities = [];
+                    section.querySelectorAll('.activity').forEach(activityInput => {
+                        if (activityInput.value) {
+                            activities.push(activityInput.value);
+                        }
+                    });
+                    itemData.activities = activities;
+                    itemData.notes = section.querySelector('.program-notes').value;
+                } else if (sectionType === 'car') {
+                    itemData.type = section.querySelector('.car-type').value;
+                    itemData.dates = section.querySelector('.rental-dates').value;
+                    itemData.insurance = section.querySelector('.insurance').value;
+                    itemData.additionalDriver = section.querySelector('.additional-driver').value;
+                    itemData.notes = section.querySelector('.car-notes').value;
+                } else if (sectionType === 'transport') {
+                    itemData.from = section.querySelector('.transport-from').value;
+                    itemData.to = section.querySelector('.transport-to').value;
+                    itemData.date = section.querySelector('.transport-date').value;
+                    itemData.time = section.querySelector('.transport-time').value;
+                    itemData.type = section.querySelector('.transport-type').value;
+                } else if (sectionType === 'package') {
+                    itemData.name = section.querySelector('.package-name').value;
+                    itemData.description = section.querySelector('.package-description').value;
+                    itemData.price = section.querySelector('.package-price').value;
+                    itemData.currency = section.querySelector('.package-currency').value;
+                    itemData.notes = section.querySelector('.package-notes').value;
+                }
+                
+                data.push(itemData);
+            });
+            
+            return data;
+        }
+
+        // Function to populate PDF template with form data
+        function populatePDFTemplate() {
+            // Populate flights
+            const flights = collectSectionData('flight');
+            const pdfFlightsContainer = document.getElementById('pdf-flights-container');
+            pdfFlightsContainer.innerHTML = '';
+            
+            flights.forEach((flight, index) => {
+                const flightIcon = flight.type === 'outbound' ? 'flight_takeoff' : 'flight_land';
+                const flightTypeText = flight.type === 'outbound' ? 'رحلة الذهاب' : 'رحلة العودة';
+                
+                const flightCard = document.createElement('div');
+                flightCard.className = 'flight-card';
+                flightCard.innerHTML = `
+                    <div class="flight-icon-box">
+                        <i class="material-icons">${flightIcon}</i>
+                    </div>
+                    <div class="flight-details">
+                        <div class="flight-main-info">
+                            <span class="flight-route">${flight.from} → ${flight.to}</span>
+                            <span class="flight-date">${flight.date}</span>
+                        </div>
+                        <div class="flight-meta">
+                            <span><i class="material-icons" style="font-size: 1rem; margin-left: 0.25rem;">schedule</i> ${flight.departureTime} - ${flight.arrivalTime}</span>
+                            <span><i class="material-icons" style="font-size: 1rem; margin-left: 0.25rem;">airline_seat_recline_normal</i> ${flight.airline}</span>
+                            <span><i class="information" style="font-size: 1rem; margin-left: 0.25rem;">info</i> ${flight.notes}</span>
+                        </div>
+                    </div>
+                `;
+                pdfFlightsContainer.appendChild(flightCard);
+            });
+            
+            // Populate hotels
+            const hotels = collectSectionData('hotel');
+            const pdfHotelsContainer = document.getElementById('pdf-hotels-container');
+            pdfHotelsContainer.innerHTML = '';
+            
+            hotels.forEach((hotel, index) => {
+                const hotelCard = document.createElement('div');
+                hotelCard.className = 'hotel-card';
+                hotelCard.innerHTML = `
+                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="${hotel.name}" class="hotel-image">
+                    <div class="hotel-content">
+                        <span class="hotel-dates">${hotel.dates}</span>
+                        <h4 class="hotel-name">${hotel.name}</h4>
+                        <div class="hotel-room">
+                            <i class="material-icons" style="font-size: 1rem; margin-left: 0.25rem;">location_on</i>
+                            ${hotel.city}
+                            <span style="margin: 0 0.5rem;">|</span>
+                            <i class="material-icons" style="font-size: 1rem; margin-left: 0.25rem;">star</i>
+                            ${hotel.rating} نجوم
+                        </div>
+                    </div>
+                `;
+                pdfHotelsContainer.appendChild(hotelCard);
+            });
+            
+            // Populate program
+            const programs = collectSectionData('program');
+            const pdfProgramContainer = document.getElementById('pdf-program-container');
+            pdfProgramContainer.innerHTML = '';
+            
+            programs.forEach((program, index) => {
+                const programItem = document.createElement('div');
+                programItem.className = 'timeline-item';
+                
+                let activitiesHTML = '';
+                program.activities.forEach(activity => {
+                    activitiesHTML += `
+                        <div class="activity-tag">
+                            <i class="material-icons">check_circle</i>
+                            ${activity}
+                        </div>
+                    `;
+                });
+                
+                programItem.innerHTML = `
+                    <div class="timeline-dot"></div>
+                    <h4 class="timeline-day-title">${program.title}</h4>
+                    <div class="timeline-content">
+                        ${activitiesHTML}
+                        ${program.notes ? `<p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-light);">
+                            <i class="material-icons" style="font-size: 1rem; vertical-align: middle; margin-left: 0.25rem;">info</i>
+                            ${program.notes}
+                        </p>` : ''}
+                    </div>
+                `;
+                pdfProgramContainer.appendChild(programItem);
+            });
+            
+            // Populate transport
+            const transports = collectSectionData('transport');
+            const pdfTransportContainer = document.getElementById('pdf-transport-container');
+            pdfTransportContainer.innerHTML = '';
+            
+            transports.forEach((transport, index) => {
+                const transportRow = document.createElement('tr');
+                transportRow.innerHTML = `
+                    <td>${transport.from}</td>
+                    <td>${transport.to}</td>
+                    <td>${transport.date}</td>
+                    <td>${transport.time}</td>
+                    <td><span class="trans-icon">${transport.type}</span></td>
+                `;
+                pdfTransportContainer.appendChild(transportRow);
+            });
+            
+            // Populate car
+            const cars = collectSectionData('car');
+            const pdfCarContainer = document.getElementById('pdf-car-container');
+            pdfCarContainer.innerHTML = '';
+            
+            if (cars.length > 0) {
+                const carSection = document.getElementById('pdf-car-section');
+                carSection.style.display = 'block';
+                
+                cars.forEach((car, index) => {
+                    const carCard = document.createElement('div');
+                    carCard.className = 'car-card';
+                    carCard.innerHTML = `
+                        <div class="car-header">
+                            <span>تفاصيل استئجار السيارة</span>
+                        </div>
+                        <table class="car-table">
+                            <tr>
+                                <th>نوع السيارة</th>
+                                <td>${car.type}</td>
+                            </tr>
+                            <tr>
+                                <th>تاريخ الاستئجار</th>
+                                <td>${car.dates}</td>
+                            </tr>
+                            <tr>
+                                <th>التأمين الشامل</th>
+                                <td>${car.insurance === 'yes' ? 'نعم' : 'لا'}</td>
+                            </tr>
+                            <tr>
+                                <th>سائق إضافي</th>
+                                <td>${car.additionalDriver === 'yes' ? 'نعم' : 'لا'}</td>
+                            </tr>
+                            <tr>
+                                <th>ملاحظات</th>
+                                <td>${car.notes}</td>
+                            </tr>
+                        </table>
+                    `;
+                    pdfCarContainer.appendChild(carCard);
+                });
+            } else {
+                const carSection = document.getElementById('pdf-car-section');
+                carSection.style.display = 'none';
+            }
+            
+            // Populate packages as a summary table
+            const packages = collectSectionData('package');
+            const pdfPackageContainer = document.getElementById('pdf-package-container');
+            pdfPackageContainer.innerHTML = '';
+            
+            if (packages.length > 0) {
+                const packageSection = document.getElementById('pdf-cost-section');
+                packageSection.style.display = 'block';
+                
+                // Create summary table
+                const summaryTable = document.createElement('table');
+                summaryTable.className = 'schedule-table';
+                summaryTable.style.marginTop = '1.25rem';
+                
+                // Table header
+                const tableHeader = document.createElement('thead');
+                tableHeader.innerHTML = `
+                    <tr>
+                        <th>الخدمة</th>
+                        <th>الوصف</th>
+                        <th>السعر</th>
+                    </tr>
+                `;
+                summaryTable.appendChild(tableHeader);
+                
+                // Table body
+                const tableBody = document.createElement('tbody');
+                let totalAmount = 0;
+                const currencySymbol = packages.length > 0 ? getCurrencySymbol(packages[0].currency) : 'ر.س';
+                
+                packages.forEach((pkg, index) => {
+                    const row = document.createElement('tr');
+                    const price = parseFloat(pkg.price) || 0;
+                    totalAmount += price;
+                    
+                    row.innerHTML = `
+                        <td>${pkg.name}</td>
+                        <td>${pkg.description}</td>
+                        <td style="font-weight: bold; color: var(--primary);">${price.toLocaleString()} ${currencySymbol}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                summaryTable.appendChild(tableBody);
+                pdfPackageContainer.appendChild(summaryTable);
+                
+                // Update total amount
+                document.getElementById('pdf-total-amount').textContent = `${totalAmount.toLocaleString()} ${currencySymbol}`;
+            } else {
+                const packageSection = document.getElementById('pdf-cost-section');
+                packageSection.style.display = 'none';
+            }
+        }
+        
+        // Function to get currency symbol
+        function getCurrencySymbol(currency) {
+            switch(currency) {
+                case 'SAR': return 'ر.س';
+                case 'USD': return '$';
+                case 'EUR': return '€';
+                default: return 'ر.س';
+            }
+        }
+
+        // Generate PDF Function - Modified to remove white borders
+        async function generatePDF() {
+            // Show loading overlay
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            try {
+                // Populate the PDF template with form data
+                populatePDFTemplate();
+                
+                // Get the offer template element
+                const offerElement = document.getElementById('offer-template');
+                
+                // Make the template visible for html2canvas (but keep it off-screen)
+                offerElement.style.display = 'block';
+                offerElement.style.position = 'absolute';
+                offerElement.style.left = '-9999px';
+                offerElement.style.top = '0';
+                
+                // Wait a bit for the DOM to update
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Use html2canvas to capture the element with modified settings
+                // Key changes to remove white borders:
+                // 1. scale: 2 - Higher scale for better quality
+                // 2. useCORS: true - Allow cross-origin images
+                // 3. backgroundColor: null - Transparent background
+                // 4. logging: false - Disable logging
+                // 5. x, y, width, height, scrollX, scrollY - Remove white borders
+                const canvas = await html2canvas(offerElement, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false,
+                    allowTaint: true,
+                    // إزالة الحواف البيضاء
+                    x: 0,
+                    y: 0,
+                    width: offerElement.offsetWidth,
+                    height: offerElement.offsetHeight,
+                    scrollX: 0,
+                    scrollY: 0
+                });
+                
+                // Hide the template again
+                offerElement.style.display = 'none';
+                
+                // Initialize jsPDF with modified settings
+                // Key changes to remove white borders:
+                // 1. unit: 'px' - Use pixels instead of mm for precise sizing
+                // 2. format: [canvas.width, canvas.height] - Set exact dimensions based on canvas
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height],
+                    hotfixes: ['px_scaling'] // Fix for pixel-based sizing
+                });
+                
+                // إضافة الصورة إلى PDF مع إزالة الهوامش
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                
+                // إضافة الصورة بدون هوامش (x=0, y=0)
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
+                
+                // Save the PDF
+                pdf.save('عرض_سياحة_جورجيا.pdf');
+                
+                // Hide loading overlay
+                document.getElementById('loading-overlay').style.display = 'none';
+                
+                // Show success message
+                showToast('تم تحميل العرض بنجاح!');
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                document.getElementById('loading-overlay').style.display = 'none';
+                showToast('حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
+            }
+        }
+        
+        // Download Offer Button
+        document.getElementById('download-offer-btn').addEventListener('click', generatePDF);
+    </script>
 </body>
 </html>
