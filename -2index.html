@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مولد عروض السياحة</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #1A2536;
+            --primary-mid: #243447;
+            --primary-light: #2C3E50;
+            --accent: #FF6B35;
+            --accent-light: #FF8C61;
+            --accent-glow: rgba(255,107,53,0.15);
+            --gold: #D4A843;
+            --teal: #00BCD4;
+            --bg: #0F1923;
+            --bg-card: #162030;
+            --bg-input: #1E2D3D;
+            --border: rgba(255,255,255,0.07);
+            --border-focus: rgba(255,107,53,0.5);
+            --text: #E8EDF2;
+            --text-muted: #7A8FA6;
+            --text-soft: #9AAFC0;
+            --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+            --shadow-glow: 0 0 20px rgba(255,107,53,0.2);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+
+            /* PDF Template vars */
+            --pdf-primary: #1A2536;
+            --pdf-accent: #FF6B35;
+            --pdf-bg-light: #F4F6F9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+        }
+
+        /* ===== TOP APP BAR ===== */
+        .app-bar {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-mid) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+        }
+
+        .app-bar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            width: 2.2rem;
+            height: 2.2rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .brand-icon .material-icons { font-size: 1.1rem; color: white; }
+
+        .brand-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+
+        .brand-sub {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .app-bar-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn .material-icons { font-size: 1rem; }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.06);
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+            box-shadow: 0 4px 14px rgba(255,107,53,0.35);
+        }
+        .btn-accent:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,107,53,0.5); }
+
+        .btn-danger {
+            background: rgba(220,53,69,0.15);
+            color: #fc8c95;
+            border: 1px solid rgba(220,53,69,0.2);
+        }
+        .btn-danger:hover { background: rgba(220,53,69,0.25); }
+
+        .btn-success {
+            background: rgba(40,167,69,0.15);
+            color: #6fcf81;
+            border: 1px solid rgba(40,167,69,0.2);
+        }
+        .btn-success:hover { background: rgba(40,167,69,0.25); }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-wrapper {
+            width: 100%;
+            max-width: 800px;
+            padding: 1.5rem 1rem 3rem;
+        }
+
+        /* ===== TABS ===== */
+        .tabs-scroll {
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.25rem;
+            scrollbar-width: none;
+        }
+        .tabs-scroll::-webkit-scrollbar { display: none; }
+
+        .tabs {
+            display: flex;
+            gap: 0.35rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 0.35rem;
+            min-width: max-content;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab .material-icons { font-size: 1rem; }
+
+        .tab:hover:not(.active) {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-soft);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+            box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+        }
+
+        /* ===== TAB CONTENT ===== */
+        .tab-content { display: none; animation: fadeSlide 0.25s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-title .material-icons {
+            font-size: 1.1rem;
+            color: var(--accent);
+            background: var(--accent-glow);
+            padding: 0.35rem;
+            border-radius: var(--radius-sm);
+        }
+
+        /* ===== FORMS ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        .form-grid.cols-1 { grid-template-columns: 1fr; }
+        .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-group.span-2 { grid-column: span 2; }
+
+        label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.875rem;
+            padding: 0.6rem 0.75rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+        }
+
+        textarea { resize: vertical; min-height: 80px; }
+
+        select option { background: var(--bg-card); }
+
+        /* ===== TOGGLE ===== */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-label { font-size: 0.85rem; font-weight: 600; color: var(--text-soft); }
+
+        .toggle-switch { position: relative; display: inline-block; width: 2.6rem; height: 1.4rem; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 1.4rem;
+            transition: 0.3s;
+        }
+        .slider:before {
+            content: "";
+            position: absolute;
+            width: 1rem; height: 1rem;
+            left: 0.2rem; bottom: 0.2rem;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        input:checked + .slider { background: linear-gradient(135deg, var(--accent), var(--accent-light)); }
+        input:checked + .slider:before { transform: translateX(1.2rem); }
+
+        /* ===== IMAGE UPLOAD ===== */
+        .upload-zone {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .img-thumb {
+            width: 5rem; height: 5rem;
+            border-radius: var(--radius-md);
+            border: 1.5px dashed rgba(255,255,255,0.15);
+            background: var(--bg-input);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            color: var(--text-muted);
+        }
+
+        .img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .img-thumb .material-icons { font-size: 1.8rem; }
+
+        .upload-btn-wrap { flex: 1; }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 0.9rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-soft);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-btn:hover { background: rgba(255,107,53,0.08); border-color: var(--border-focus); color: var(--accent); }
+        .upload-btn .material-icons { font-size: 1rem; }
+        .upload-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem; }
+
+        /* ===== DYNAMIC SECTION ITEM ===== */
+        .dyn-section {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .dyn-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-soft);
+        }
+
+        .btn-add-dyn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            width: 100%;
+            justify-content: center;
+            padding: 0.6rem;
+            background: rgba(255,107,53,0.06);
+            border: 1.5px dashed rgba(255,107,53,0.3);
+            border-radius: var(--radius-md);
+            color: var(--accent);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+        .btn-add-dyn:hover { background: rgba(255,107,53,0.12); border-color: var(--accent); }
+        .btn-add-dyn .material-icons { font-size: 1rem; }
+
+        /* ===== INLINE ITEM (Includes/Excludes) ===== */
+        .inline-item {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        .inline-item input { flex: 1; }
+
+        .btn-remove-inline {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .btn-remove-inline:hover { background: rgba(220,53,69,0.15); color: #fc8c95; }
+        .btn-remove-inline .material-icons { font-size: 1rem; }
+
+        /* ===== RECORDS ===== */
+        .record-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.6rem;
+            transition: background 0.2s;
+        }
+        .record-item:hover { background: rgba(255,255,255,0.055); }
+        .record-name { font-size: 0.875rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+        .record-meta { font-size: 0.72rem; color: var(--text-muted); }
+        .record-actions { display: flex; gap: 0.4rem; }
+
+        /* ===== LOADING ===== */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10,16,24,0.92);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(6px);
+        }
+        .loading-spinner {
+            width: 3rem; height: 3rem;
+            border: 3px solid rgba(255,255,255,0.08);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 1rem;
+        }
+        .loading-text { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .loading-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.3rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(4rem);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.3s ease;
+            z-index: 10000;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast .material-icons { color: #6fcf81; font-size: 1.1rem; }
+
+        /* ===== COMPANY LOGO ===== */
+        .logo-img {
+            width: 2rem; height: 2rem;
+            border-radius: 50%;
+            object-fit: contain;
+            background: white;
+            padding: 2px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.span-2 { grid-column: span 1; }
+            .app-bar { padding: 0 1rem; }
+            .main-wrapper { padding: 1rem 0.75rem 3rem; }
+            .brand-name { font-size: 0.875rem; }
+            .app-bar-actions .btn-ghost span:not(.material-icons) { display: none; }
+        }
+
+        /* ===== HOTEL LINK ===== */
+        .link-input-wrap { display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:4px 8px; }
+        .link-input-wrap .link-icon { color:var(--accent); font-size:18px; flex-shrink:0; }
+        .link-input-wrap .hotel-url { flex:1; background:transparent; border:none; outline:none; color:var(--text); font-family:'Tajawal',sans-serif; font-size:0.875rem; direction:ltr; }
+        .link-input-wrap .hotel-url::placeholder { color:var(--text-secondary); }
+        .link-open-btn { background:var(--accent); color:white; border:none; border-radius:7px; padding:5px 8px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:opacity .2s; }
+        .link-open-btn:hover { opacity:.85; }
+        .link-open-btn .material-icons { font-size:16px; }
+        /* ====================================================
+           PDF OFFER TEMPLATE — بوابات العالم Style
+        ==================================================== */
+        .offer-template {
+            display: none;
+            width: 794px;
+            background: #E5E5E5;
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+            color: #1A202C;
+            position: absolute;
+            left: -9999px;
+            top: 0;
+        }
+        .ot-poster {
+            width: 100%;
+            background: #FFFFFF;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Header */
+        .ot-header {
+            position: relative;
+            height: 340px;
+            overflow: hidden;
+        }
+        .ot-header-bg {
+            position: absolute; top:0; left:0;
+            width:100%; height:100%;
+            object-fit: cover; z-index:0;
+        }
+        .ot-header-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: linear-gradient(to bottom, rgba(26,37,54,0.4), rgba(26,37,54,0.95));
+            z-index:1;
+        }
+        .ot-brand-badge {
+            position: absolute; top:18px; right:18px;
+            background: rgba(255,255,255,0.95);
+            padding: 7px 18px; border-radius: 50px;
+            display: flex; align-items:center; gap:10px;
+            z-index:3; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .ot-brand-badge img { height:36px; }
+        .ot-brand-badge span { color:#1A2536; font-weight:700; font-size:13px; }
+        .ot-header-content {
+            position: absolute; inset:0; z-index:2;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            text-align:center; padding:0 40px; color:white;
+        }
+        .ot-tag-pill {
+            background: #FF6B35; color:white;
+            padding:5px 16px; border-radius:20px;
+            font-size:12px; font-weight:700; margin-bottom:14px;
+            box-shadow: 0 4px 10px rgba(255,107,53,0.4);
+        }
+        .ot-h-title { font-size:32px; font-weight:800; margin-bottom:8px; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+        .ot-h-subtitle { font-size:16px; opacity:0.9; }
+        /* Content */
+        .ot-content {
+            background: white; padding: 30px 35px 35px;
+            position: relative; margin-top:-30px;
+            border-radius: 30px 30px 0 0; z-index:5;
+        }
+        /* Overview */
+        .ot-overview { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:32px; }
+        .ot-info-card { background:#F4F6F8; padding:16px 12px; border-radius:14px; text-align:center; }
+        .ot-info-card .material-icons {
+            font-size:26px; color:#FF6B35;
+            background:rgba(255,107,53,0.1); padding:7px;
+            border-radius:50%; display:block; margin:0 auto 7px;
+        }
+        .ot-info-label { display:block; font-size:10px; color:#718096; margin-bottom:3px; }
+        .ot-info-value { font-weight:700; color:#1A2536; font-size:13px; }
+        /* Section */
+        .ot-section { margin-bottom:30px; }
+        .ot-sec-hdr { display:flex; align-items:center; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid #F4F6F8; }
+        .ot-sec-icon {
+            background:#1A2536; color:white;
+            width:36px; height:36px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            margin-left:12px; flex-shrink:0;
+        }
+        .ot-sec-icon .material-icons { font-size:18px; }
+        .ot-sec-title { font-size:19px; font-weight:700; color:#1A2536; }
+        /* Flight */
+        .ot-flight {
+            background:#F4F6F8; border-radius:14px; padding:16px;
+            margin-bottom:10px; display:flex; align-items:center;
+            border-right:5px solid #FF6B35;
+        }
+        .ot-flight-ico {
+            width:44px; height:44px; background:white; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            margin-left:16px; flex-shrink:0; box-shadow:0 3px 8px rgba(0,0,0,0.06);
+        }
+        .ot-flight-ico .material-icons { color:#1A2536; font-size:20px; }
+        .ot-flight-det { flex:1; }
+        .ot-flight-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+        .ot-flight-route { font-weight:700; font-size:16px; color:#1A202C; }
+        .ot-flight-date { background:#1A2536; color:white; padding:3px 8px; border-radius:5px; font-size:11px; }
+        .ot-flight-meta { display:flex; gap:14px; font-size:12px; color:#718096; }
+        .ot-flight-meta span { display:flex; align-items:center; gap:4px; }
+        .ot-flight-meta .material-icons { font-size:13px; }
+        /* Hotels */
+        .ot-hotel {
+            display:flex; background:white; border-radius:14px;
+            overflow:hidden; border:1px solid #eee; margin-bottom:12px;
+            box-shadow:0 3px 10px rgba(0,0,0,0.04);
+        }
+        .ot-hotel-img { width:130px; object-fit:cover; flex-shrink:0; }
+        .ot-hotel-body { padding:13px 16px; flex:1; }
+        .ot-hotel-dates {
+            display:inline-block; background:rgba(26,37,54,0.1);
+            color:#1A2536; padding:3px 7px; border-radius:5px;
+            font-size:11px; font-weight:700; margin-bottom:6px;
+        }
+        .ot-hotel-name { font-size:15px; font-weight:700; margin-bottom:4px; }
+        .ot-hotel-room { font-size:12px; color:#718096; display:flex; align-items:center; gap:4px; }
+        .ot-hotel-link { display:inline-block; margin-top:7px; padding:4px 12px; background:#FF6B35; color:white; border-radius:14px; font-size:11px; font-weight:700; text-decoration:none; }
+        .ot-hotel-room .material-icons { font-size:13px; }
+        /* Car */
+        .ot-car { background:#F4F6F8; border-radius:13px; overflow:hidden; border:1px solid #e0e0e0; margin-bottom:12px; }
+        .ot-car-head {
+            background:linear-gradient(to left, #1A2536, #2C3E50);
+            color:white; padding:12px 16px;
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        .ot-car-head-t { font-weight:700; font-size:14px; display:flex; align-items:center; gap:7px; }
+        .ot-car-badge { background:rgba(255,255,255,0.18); padding:3px 9px; border-radius:12px; font-size:11px; }
+        .ot-car-tbl { width:100%; border-collapse:collapse; }
+        .ot-car-tbl th { text-align:right; padding:9px 14px; background:#eff1f4; color:#1A2536; font-weight:700; font-size:12px; width:30%; border-bottom:1px solid #e0e0e0; }
+        .ot-car-tbl td { padding:9px 14px; font-size:12px; border-bottom:1px solid #f0f0f0; }
+        /* Transfers */
+        .ot-trans-tbl { width:100%; border-collapse:collapse; border-radius:10px; overflow:hidden; border:1px solid #eee; }
+        .ot-trans-tbl thead tr { background:#1A2536; color:white; }
+        .ot-trans-tbl th { padding:9px 13px; text-align:right; font-size:12px; font-weight:600; }
+        .ot-trans-tbl td { padding:9px 13px; font-size:12px; border-bottom:1px solid #f0f0f0; }
+        .ot-trans-tbl tbody tr:nth-child(even) { background:#FAFAFA; }
+        /* Timeline */
+        .ot-timeline { position:relative; padding-right:26px; }
+        .ot-timeline::before { content:''; position:absolute; right:6px; top:10px; bottom:10px; width:2px; background:#E2E8F0; }
+        .ot-tl-item { position:relative; margin-bottom:24px; }
+        .ot-tl-dot { position:absolute; right:-23px; top:4px; width:14px; height:14px; border-radius:50%; background:white; border:4px solid #FF6B35; z-index:1; }
+        .ot-tl-title { font-size:15px; font-weight:700; color:#1A2536; margin-bottom:9px; display:flex; align-items:center; gap:7px; }
+        .ot-tl-title .material-icons { color:#FF6B35; font-size:15px; }
+        .ot-tl-body { background:#F4F6F8; padding:12px; border-radius:9px; margin-right:7px; }
+        .ot-act-tag { display:flex; align-items:center; gap:7px; padding:5px 9px; margin-bottom:5px; background:white; border-radius:6px; font-size:12px; color:#1A202C; }
+        .ot-act-tag .material-icons { color:#FF6B35; font-size:14px; }
+        /* Cost */
+        .ot-cost-card {
+            background:linear-gradient(135deg, #1A2536 0%, #2C3E50 100%);
+            color:white; padding:26px; border-radius:16px;
+            text-align:center; margin-bottom:16px;
+        }
+        .ot-cost-lbl { font-size:13px; opacity:.8; margin-bottom:4px; }
+        .ot-cost-amt { font-size:32px; font-weight:800; margin-bottom:10px; }
+        .ot-cost-badge { background:#FF6B35; color:white; padding:4px 14px; border-radius:16px; font-size:12px; font-weight:700; display:inline-block; }
+        .ot-coord { text-align:center; color:#718096; font-size:12px; margin-top:10px; }
+        .ot-coord strong { color:#1A2536; }
+        /* Includes */
+        .ot-inc-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .ot-inc-box { padding:16px; border-radius:13px; }
+        .ot-inc-box.inc { background:rgba(26,37,54,0.05); }
+        .ot-inc-box.exc { background:rgba(255,107,53,0.05); }
+        .ot-inc-box h4 { margin-bottom:11px; display:flex; align-items:center; gap:7px; font-size:13px; }
+        .ot-inc-box.inc h4 { color:#1A2536; }
+        .ot-inc-box.exc h4 { color:#FF6B35; }
+        .ot-inc-box ul { list-style:none; }
+        .ot-inc-box li { display:flex; gap:6px; align-items:flex-start; font-size:12px; margin-bottom:6px; }
+        .ot-inc-box li .material-icons { font-size:13px; flex-shrink:0; margin-top:1px; }
+        .ot-inc-box.inc li .material-icons { color:#1A2536; }
+        .ot-inc-box.exc li .material-icons { color:#FF6B35; }
+        /* Policies */
+        .ot-policy { background:white; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; margin-bottom:10px; }
+        .ot-pol-head { background:#F4F6F8; padding:11px 16px; display:flex; align-items:center; gap:9px; border-bottom:1px solid #E2E8F0; }
+        .ot-pol-head .material-icons { color:#FF6B35; font-size:17px; }
+        .ot-pol-head h4 { font-size:14px; font-weight:700; color:#1A2536; }
+        .ot-pol-body { padding:12px 16px; }
+        .ot-pol-list { list-style:none; }
+        .ot-pol-list li { position:relative; padding-right:14px; margin-bottom:7px; font-size:12px; line-height:1.6; }
+        .ot-pol-list li::before { content:"•"; color:#FF6B35; font-weight:bold; position:absolute; right:0; top:-1px; }
+        /* Payment */
+        .ot-pay-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+        .ot-pay-item { background:#F4F6F8; padding:9px 7px; border-radius:9px; text-align:center; font-size:11px; font-weight:600; }
+        .ot-pay-item .material-icons { color:#1A2536; font-size:19px; display:block; margin:0 auto 4px; }
+        .ot-bank { background:white; border:1px solid #E2E8F0; border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+        .ot-bank-head { display:flex; align-items:center; gap:6px; margin-bottom:8px; color:#1A2536; font-weight:700; font-size:13px; }
+        .ot-bank-head .material-icons { font-size:16px; }
+        .ot-bank-row { display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; }
+        .ot-bank-lbl { color:#718096; }
+        .ot-bank-val { font-family:monospace; direction:ltr; text-align:right; font-weight:600; }
+        .ot-bank-benef { margin-top:7px; padding-top:7px; border-top:1px dashed #eee; font-size:11px; color:#1A2536; font-weight:600; }
+        /* Terms */
+        .ot-terms { background:#FFF5F2; padding:14px 18px; border-radius:12px; border-right:4px solid #FF6B35; }
+        .ot-terms h4 { color:#C53030; margin-bottom:9px; display:flex; align-items:center; gap:6px; font-size:13px; }
+        .ot-terms ul { list-style:none; }
+        .ot-terms li { position:relative; padding-right:13px; font-size:12px; margin-bottom:5px; line-height:1.5; }
+        .ot-terms li::before { content:"•"; color:#FF6B35; position:absolute; right:0; }
+        /* Footer */
+        .ot-footer { background:#F4F6F8; padding:22px; text-align:center; }
+
+        /* Page break helpers */
+        .ot-section  { page-break-inside: avoid; break-inside: avoid; }
+        .ot-hotel    { page-break-inside: avoid; break-inside: avoid; }
+        .ot-flight   { page-break-inside: avoid; break-inside: avoid; }
+        .ot-tl-item  { page-break-inside: avoid; break-inside: avoid; }
+        .ot-policy   { page-break-inside: avoid; break-inside: avoid; }
+        .ot-bank     { page-break-inside: avoid; break-inside: avoid; }
+        .ot-cost-card{ page-break-inside: avoid; break-inside: avoid; }
+        .ot-inc-grid { page-break-inside: avoid; break-inside: avoid; }
+        .ot-terms    { page-break-inside: avoid; break-inside: avoid; }
+        /* Ensure sections breathe so breaks don't clip text */
+        .ot-content  { padding-bottom: 20px; }
+        .ot-section  { margin-bottom: 28px; padding-bottom: 4px; }
+        .ot-hotel   { page-break-inside: avoid; }
+        .ot-flight  { page-break-inside: avoid; }
+        .ot-tl-item { page-break-inside: avoid; }
+        .ot-policy  { page-break-inside: avoid; }
+        .ot-bank    { page-break-inside: avoid; }
+        .ot-cost-card { page-break-inside: avoid; }
+        .ot-inc-grid  { page-break-inside: avoid; }
+        .ot-terms     { page-break-inside: avoid; }
+        .ot-footer img { height:48px; opacity:.9; margin-bottom:9px; display:block; margin-left:auto; margin-right:auto; }
+        .ot-footer-name { font-size:14px; font-weight:700; color:#1A2536; margin-bottom:2px; }
+        .ot-footer-sub { font-size:11px; color:#718096; }
+    </style>
+
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">جاري إنشاء ملف PDF...</p>
+    <p class="loading-sub">يرجى الانتظار لحظة</p>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i class="material-icons">check_circle</i>
+    <span id="toast-msg">تم الحفظ بنجاح</span>
+</div>
+
+<!-- App Bar -->
+<div class="app-bar">
+    <div class="app-bar-brand">
+        <div class="brand-icon"><i class="material-icons">travel_explore</i></div>
+        <div>
+            <div class="brand-name">مولد عروض السياحة</div>
+            <div class="brand-sub">لوحة التحكم الاحترافية</div>
+        </div>
+    </div>
+    <div class="app-bar-actions">
+        <button class="btn btn-ghost" id="save-record-btn">
+            <i class="material-icons">save</i>
+            <span>حفظ</span>
+        </button>
+        <button class="btn btn-accent" id="download-offer-btn">
+            <i class="material-icons">picture_as_pdf</i>
+            <span>تحميل PDF</span>
+        </button>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main-wrapper">
+
+    <!-- Tabs -->
+    <div class="tabs-scroll">
+        <div class="tabs">
+            <div class="tab active" data-tab="basic"><i class="material-icons">info</i>أساسي</div>
+            <div class="tab" data-tab="flight"><i class="material-icons">flight_takeoff</i>طيران</div>
+            <div class="tab" data-tab="hotels"><i class="material-icons">hotel</i>فنادق</div>
+            <div class="tab" data-tab="car"><i class="material-icons">directions_car</i>سيارة</div>
+            <div class="tab" data-tab="program"><i class="material-icons">calendar_today</i>البرنامج</div>
+            <div class="tab" data-tab="transport"><i class="material-icons">commute</i>تنقلات</div>
+            <div class="tab" data-tab="package"><i class="material-icons">redeem</i>الباقة</div>
+            <div class="tab" data-tab="policies"><i class="material-icons">gavel</i>سياسات</div>
+            <div class="tab" data-tab="payment"><i class="material-icons">account_balance_wallet</i>دفع</div>
+            <div class="tab" data-tab="records"><i class="material-icons">history</i>السجل</div>
+        </div>
+    </div>
+
+    <!-- ===== BASIC TAB ===== -->
+    <div class="tab-content active" id="basic">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="material-icons">business</i>شعار الشركة</div>
+            </div>
+            <div class="upload-zone">
+                <div class="img-thumb" id="company-logo-preview">
+                    <img src="" alt="logo" id="company-logo-img" style="height:60px;object-fit:contain;border-radius:8px;">
+                </div>
+                <div class="upload-btn-wrap">
+                    <label class="upload-btn" onclick="document.getElementById('company-logo-input').click()">
+                        <i class="material-icons">cloud_upload</i> تغيير شعار الشركة
+                        <input type="file" id="company-logo-input" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+                    </label>
+                    <p class="upload-hint">الشعار يظهر في أعلى PDF والفوتر</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="material-icons">image</i>صورة الغلاف</div>
+            </div>
+            <div class="upload-zone">
+                <div class="img-thumb" id="main-image-preview">
+                    <i class="material-icons">add_photo_alternate</i>
+                </div>
+                <div class="upload-btn-wrap">
+                    <label class="upload-btn" onclick="document.getElementById('main-image-input').click()">
+                        <i class="material-icons">cloud_upload</i> رفع صورة غلاف
+                        <input type="file" id="main-image-input" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'main-image-preview', 1200)">
+                    </label>
+                    <p class="upload-hint">JPG أو PNG — يُفضل أبعاد أفقية عريضة</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="material-icons">person</i>معلومات الرحلة</div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>اسم العميل</label>
+                    <input type="text" id="client-name" value="الأستاذ أحمد">
+                </div>
+                <div class="form-group">
+                    <label>رقم الجوال</label>
+                    <input type="text" id="client-phone" value="+966 50 000 0000">
+                </div>
+                <div class="form-group">
+                    <label>الوجهة</label>
+                    <input type="text" id="destination" value="جورجيا">
+                </div>
+                <div class="form-group">
+                    <label>المدن</label>
+                    <input type="text" id="cities" value="تيبليسي، باتومي">
+                </div>
+                <div class="form-group">
+                    <label>تاريخ السفر</label>
+                    <input type="text" id="travel-date" value="15 - 25 مارس 2026">
+                </div>
+                <div class="form-group">
+                    <label>عدد الليالي</label>
+                    <input type="number" id="nights-count" value="10">
+                </div>
+                <div class="form-group">
+                    <label>عدد البالغين</label>
+                    <input type="number" id="adults-count" value="2">
+                </div>
+                <div class="form-group">
+                    <label>عدد الأطفال</label>
+                    <input type="number" id="children-count" value="0">
+                </div>
+                <div class="form-group">
+                    <label>نوع البرنامج</label>
+                    <input type="text" id="program-type" value="برنامج خاص">
+                </div>
+                <div class="form-group">
+                    <label>منسق العرض</label>
+                    <input type="text" id="coordinator" value="جمال">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FLIGHT TAB ===== -->
+    <div class="tab-content" id="flight">
+        <div class="toggle-row">
+            <span class="toggle-label">تفعيل معلومات الطيران</span>
+            <label class="toggle-switch"><input type="checkbox" checked id="flight-toggle"><span class="slider"></span></label>
+        </div>
+        <div id="flights-container">
+            <div class="dyn-section flight-section" id="flight-section-0">
+                <div class="dyn-section-header">
+                    <span>✈ رحلة 1</span>
+                    <button class="btn btn-danger" onclick="removeSection('flight-section-0','flights-container')"><i class="material-icons">delete</i> حذف</button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>من</label><input type="text" class="flight-from" value="الرياض (RUH)"></div>
+                    <div class="form-group"><label>إلى</label><input type="text" class="flight-to" value="تيبليسي (TBS)"></div>
+                    <div class="form-group"><label>التاريخ</label><input type="text" class="flight-date" value="15 مارس 2026"></div>
+                    <div class="form-group"><label>شركة الطيران</label><input type="text" class="airline" value="السعودية"></div>
+                    <div class="form-group"><label>وقت المغادرة</label><input type="text" class="departure-time" value="09:00 ص"></div>
+                    <div class="form-group"><label>وقت الوصول</label><input type="text" class="arrival-time" value="02:00 م"></div>
+                    <div class="form-group span-2"><label>نوع الرحلة</label><input type="text" class="flight-type" value="مباشر"></div>
+                    <div class="form-group span-2"><label>شعار الخطوط (اختياري)</label>
+                        <label class="upl-btn"><i class="material-icons">flight</i> رفع شعار
+                            <input type="file" class="airline-logo-input" accept="image/*" style="display:none" onchange="handleImageUpload(this,'airline-logo-preview-0',300)">
+                        </label>
+                        <div class="img-thumb" id="airline-logo-preview-0" style="width:80px;height:40px;margin-top:.5rem;border-radius:6px;background:#1e2d3d;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-add-dyn" id="add-flight-btn"><i class="material-icons">add</i> إضافة رحلة</button>
+    </div>
+
+    <!-- ===== HOTELS TAB ===== -->
+    <div class="tab-content" id="hotels">
+        <div class="toggle-row">
+            <span class="toggle-label">تفعيل الفنادق</span>
+            <label class="toggle-switch"><input type="checkbox" checked id="hotels-toggle"><span class="slider"></span></label>
+        </div>
+        <div id="hotels-container">
+            <div class="dyn-section hotel-section" id="hotel-section-0">
+                <div class="dyn-section-header">
+                    <span>\ud83c\udfe8 فندق 1</span>
+                    <button class="btn btn-danger" onclick="removeSection('hotel-section-0','hotels-container')"><i class="material-icons">delete</i> حذف</button>
+                </div>
+                <div class="form-group" style="margin-bottom:.75rem;">
+                    <label>صورة الفندق</label>
+                    <label class="upload-btn" onclick="document.getElementById('hotel-input-0').click()">
+                        <i class="material-icons">image</i> رفع صورة
+                        <input type="file" id="hotel-input-0" accept="image/*" style="display:none" onchange="handleImageUpload(this,'hotel-preview-0',600)">
+                    </label>
+                    <div class="img-thumb" id="hotel-preview-0" style="width:60px;height:60px;margin-top:.5rem;border-radius:8px;"></div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>اسم الفندق</label><input type="text" class="hotel-name" value="Radisson Blu"></div>
+                    <div class="form-group"><label>المدينة</label><input type="text" class="hotel-city" value="تيبليسي"></div>
+                    <div class="form-group"><label>تاريخ الإقامة</label><input type="text" class="hotel-dates" value="15 - 18 مارس (3 ليالي)"></div>
+                    <div class="form-group"><label>نوع الغرفة</label><input type="text" class="room-type" value="جناح ملكي"></div>
+                    <div class="form-group span-2">
+                        <label>رابط الموقع الرسمي للفندق</label>
+                        <div class="link-input-wrap">
+                            <i class="material-icons link-icon">link</i>
+                            <input type="text" class="hotel-url" placeholder="https://...">
+                            <button type="button" class="link-open-btn" onclick="openHotelLink(this)" title="فتح الرابط">
+                                <i class="material-icons">open_in_new</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-add-dyn" id="add-hotel-btn"><i class="material-icons">add</i> إضافة فندق</button>
+    </div>
+
+    <!-- ===== CAR TAB ===== -->
+    <div class="tab-content" id="car">
+        <div class="toggle-row">
+            <span class="toggle-label">تفعيل استئجار السيارة</span>
+            <label class="toggle-switch"><input type="checkbox" id="car-toggle"><span class="slider"></span></label>
+        </div>
+        <div id="car-container">
+            <div class="dyn-section car-section" id="car-section-0">
+                <div class="dyn-section-header">
+                    <span>\ud83d\ude97 سيارة 1</span>
+                    <button class="btn btn-danger" onclick="removeSection('car-section-0','car-container')"><i class="material-icons">delete</i> حذف</button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>نوع السيارة</label><input type="text" class="car-type" value="SUV - 4 ركاب"></div>
+                    <div class="form-group"><label>تاريخ الاستئجار</label><input type="text" class="rental-dates" value="15 - 25 مارس 2026"></div>
+                    <div class="form-group"><label>الموديل</label><input type="text" class="car-model" value="تويوتا راف 4"></div>
+                    <div class="form-group"><label>مدة الإيجار</label><input type="text" class="rental-duration" value="9 أيام"></div>
+                    <div class="form-group"><label>استلام من</label><input type="text" class="pickup-location" value="مطار تيبليسي الدولي"></div>
+                    <div class="form-group"><label>تسليم في</label><input type="text" class="dropoff-location" value="مطار تيبليسي الدولي"></div>
+                    <div class="form-group span-2"><label>المشمولات</label><textarea class="car-inclusions" rows="2">تأمين شامل، كيلومترات مفتوحة، ضريبة القيمة المضافة</textarea></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-add-dyn" id="add-car-btn"><i class="material-icons">add</i> إضافة سيارة</button>
+    </div>
+
+    <!-- ===== PROGRAM TAB ===== -->
+    <div class="tab-content" id="program">
+        <div class="toggle-row">
+            <span class="toggle-label">تفعيل البرنامج اليومي</span>
+            <label class="toggle-switch"><input type="checkbox" checked id="program-toggle"><span class="slider"></span></label>
+        </div>
+        <div id="program-container">
+            <div class="dyn-section program-section" id="program-section-0">
+                <div class="dyn-section-header">
+                    <span>\ud83d\udcc5 يوم 1</span>
+                    <button class="btn btn-danger" onclick="removeSection('program-section-0','program-container')"><i class="material-icons">delete</i> حذف</button>
+                </div>
+                <div class="form-group" style="margin-bottom:.75rem;"><label>عنوان اليوم</label><input type="text" class="program-title" value="اليوم الأول: الوصول والاستقبال"></div>
+                <div class="form-grid">
+                    <div class="form-group"><label>نشاط 1</label><input type="text" class="activity" value="استقبال من المطار"></div>
+                    <div class="form-group"><label>نشاط 2</label><input type="text" class="activity" value="تسجيل في الفندق"></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-add-dyn" id="add-program-btn"><i class="material-icons">add</i> إضافة يوم</button>
+    </div>
+
+    <!-- ===== TRANSPORT TAB ===== -->
+    <div class="tab-content" id="transport">
+        <div class="toggle-row">
+            <span class="toggle-label">تفعيل التنقلات</span>
+            <label class="toggle-switch"><input type="checkbox" checked id="transport-toggle"><span class="slider"></span></label>
+        </div>
+        <div id="transport-container">
+            <div class="dyn-section transport-section" id="transport-section-0">
+                <div class="dyn-section-header">
+                    <span>\ud83d\uddfa تنقل 1</span>
+                    <button class="btn btn-danger" onclick="removeSection('transport-section-0','transport-container')"><i class="material-icons">delete</i> حذف</button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>من</label><input type="text" class="transport-from" value="مطار تيبليسي"></div>
+                    <div class="form-group"><label>إلى</label><input type="text" class="transport-to" value="الفندق"></div>
+                    <div class="form-group"><label>التاريخ</label><input type="text" class="transport-date" value="15 مارس 2026"></div>
+                    <div class="form-group"><label>وسيلة النقل</label><input type="text" class="transport-method" value="سيارة خاصة"></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-add-dyn" id="add-transport-btn"><i class="material-icons">add</i> إضافة تنقل</button>
+    </div>
+
+    <!-- ===== PACKAGE TAB ===== -->
+    <div class="tab-content" id="package">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="material-icons">payments</i>تفاصيل السعر</div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>السعر الإجمالي</label><input type="number" id="total-price" value="4500"></div>
+                <div class="form-group"><label>العملة</label>
+                    <select id="currency"><option value="SAR" selected>ريال سعودي</option><option value="USD">دولار أمريكي</option></select>
+                </div>
+                <div class="form-group span-2"><label>شعار الخصم</label><input type="text" id="discount-badge" value="شامل خصم خاص"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="material-icons">check_circle</i>الباقة تشمل</div>
+            </div>
+            <div id="includes-container">
+                <div class="inline-item" id="include-0">
+                    <input type="text" class="include-text" value="تذاكر طيران ذهاب وعودة">
+                    <button class="btn-remove-inline" onclick="removeSection('include-0','includes-container')"><i class="material-icons">close</i></button>
+                </div>
+            </div>
+            <button class="btn-add-dyn" onclick="addIncludeItem()"><i class="material-icons">add</i> إضافة عنصر</button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="material-icons">cancel</i>الباقة لا تشمل</div>
+            </div>
+            <div id="excludes-container">
+                <div class="inline-item" id="exclude-0">
+                    <input type="text" class="exclude-text" value="المصاريف الشخصية">
+                    <button class="btn-remove-inline" onclick="removeSection('exclude-0','excludes-container')"><i class="material-icons">close</i></button>
+                </div>
+            </div>
+            <button class="btn-add-dyn" onclick="addExcludeItem()"><i class="material-icons">add</i> إضافة عنصر</button>
+        </div>
+    </div>
+
+    <!-- ===== POLICIES TAB ===== -->
+    <div class="tab-content" id="policies">
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">hotel</i>سياسات الفنادق</div></div>
+            <div class="form-group"><textarea class="policy-hotels" rows="4">وقت الدخول للفنادق يكون بين الساعة 2:00 إلى 3:00 عصرًا، ووقت الخروج الساعة 12:00 ظهرًا. الليلة الإضافية (Late check-out أو Early check-in) يمكن طلبها مقابل رسوم إضافية حسب سياسة الفندق والتوافر. الغرف مزدوجة أو منفصلة (Twin/Double) بحسب التوافر.</textarea></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">flight</i>سياسات الطيران</div></div>
+            <div class="form-group"><textarea class="policy-flights" rows="3">تشمل الباقة تذاكر الطيران (حسب التفاصيل المحددة في العرض). لا يمكن إلغاء أو تعديل التذاكر بعد تأكيدها نهائيًا، وذلك حسب سياسة شركة الطيران.</textarea></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">luggage</i>الوزن المسموح به</div></div>
+            <div class="form-group"><textarea class="policy-weight" rows="2">الوزن المسموح به على الرحلات الداخلية: 20 كجم لكل شخص.</textarea></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">schedule</i>مواعيد الحضور للمطار</div></div>
+            <div class="form-group"><textarea class="policy-airport" rows="2">يرجى الحضور إلى المطار قبل 3 ساعات من موعد الرحلات الخارجية. يرجى الحضور إلى المطار قبل ساعتين من موعد الرحلات الداخلية.</textarea></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">warning</i>الشروط العامة</div></div>
+            <div class="form-group"><textarea class="general-terms" rows="3">الحجز غير قابل للإلغاء أو التعديل (المبلغ بالكامل غير مسترد). الشركة غير مسئولة عن تصاريح السفر وتأشيرات الخروج والعودة. قد تتغير الأسعار والإمكانية وفقًا لتاريخ السفر المطلوب.</textarea></div>
+        </div>
+    </div>
+
+    <!-- ===== PAYMENT TAB ===== -->
+    <div class="tab-content" id="payment">
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">business</i>الشركة المستفيدة</div></div>
+            <div class="form-group"><input type="text" id="beneficiary" value="بوابات العالم للسفر والسياحة"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">account_balance</i>بنك الراجحي</div></div>
+            <div class="form-grid">
+                <div class="form-group"><label>رقم الحساب</label><input type="text" class="bank-account" value="5876080452853"></div>
+                <div class="form-group"><label>الآيبان</label><input type="text" class="bank-iban" value="SA5680000587608010452853"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">account_balance</i>البنك الأهلي (SNB)</div></div>
+            <div class="form-grid">
+                <div class="form-group"><label>رقم الحساب</label><input type="text" class="bank-account" value="01400019666903"></div>
+                <div class="form-group"><label>الآيبان</label><input type="text" class="bank-iban" value="SA2910000001400019666903"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">account_balance</i>بنك البلاد</div></div>
+            <div class="form-grid">
+                <div class="form-group"><label>رقم الحساب</label><input type="text" class="bank-account" value="722140112730002"></div>
+                <div class="form-group"><label>الآيبان</label><input type="text" class="bank-iban" value="SA9115000722140112730002"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">account_balance</i>بنك SAB</div></div>
+            <div class="form-grid">
+                <div class="form-group"><label>رقم الحساب</label><input type="text" class="bank-account" value="262342454001"></div>
+                <div class="form-group"><label>الآيبان</label><input type="text" class="bank-iban" value="SA0645000000262342454001"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== RECORDS TAB ===== -->
+    <div class="tab-content" id="records">
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i class="material-icons">history</i>العروض المحفوظة</div></div>
+            <div id="records-list">
+                <p style="text-align:center;color:var(--text-muted);padding:1.5rem 0;font-size:.875rem;">لا توجد عروض محفوظة حالياً</p>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /main-wrapper -->
+
+<!-- ===== OFFER TEMPLATE (hidden, for PDF) ===== -->
+<div class="offer-template" id="offer-template">
+<div class="ot-poster">
+
+    <!-- Header -->
+    <div class="ot-header">
+        <img src="" alt="cover" class="ot-header-bg" id="pdf-header-img">
+        <div class="ot-header-overlay"></div>
+        <div class="ot-brand-badge">
+            <img src="" alt="logo" id="pdf-logo-img">
+            <span id="pdf-company-name">بوابات العالم للسفر والسياحة</span>
+        </div>
+        <div class="ot-header-content">
+            <div class="ot-tag-pill">رحلة مميزة</div>
+            <h1 class="ot-h-title" id="pdf-main-title">برنامج خاص</h1>
+            <h2 class="ot-h-subtitle" id="pdf-cities-sub">الوجهة</h2>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="ot-content">
+
+        <!-- Overview Cards -->
+        <div class="ot-overview">
+            <div class="ot-info-card">
+                <i class="material-icons">calendar_today</i>
+                <span class="ot-info-label">تاريخ السفر</span>
+                <span class="ot-info-value" id="pdf-date">-</span>
+            </div>
+            <div class="ot-info-card">
+                <i class="material-icons">bed</i>
+                <span class="ot-info-label">مدة الإقامة</span>
+                <span class="ot-info-value" id="pdf-nights">-</span>
+            </div>
+            <div class="ot-info-card">
+                <i class="material-icons">group</i>
+                <span class="ot-info-label">عدد الأفراد</span>
+                <span class="ot-info-value" id="pdf-pax">-</span>
+            </div>
+            <div class="ot-info-card">
+                <i class="material-icons">stars</i>
+                <span class="ot-info-label">نوع البرنامج</span>
+                <span class="ot-info-value" id="pdf-prog-type">-</span>
+            </div>
+        </div>
+
+        <!-- Flights -->
+        <div class="ot-section" id="pdf-sec-flights">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">flight_takeoff</i></div>
+                <h3 class="ot-sec-title">تفاصيل الطيران</h3>
+            </div>
+            <div id="pdf-flights"></div>
+        </div>
+
+        <!-- Hotels -->
+        <div class="ot-section" id="pdf-sec-hotels">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">hotel</i></div>
+                <h3 class="ot-sec-title">الإقامة الفندقية</h3>
+            </div>
+            <div id="pdf-hotels"></div>
+        </div>
+
+        <!-- Car -->
+        <div class="ot-section" id="pdf-sec-car">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">directions_car</i></div>
+                <h3 class="ot-sec-title">استئجار السيارة</h3>
+            </div>
+            <div id="pdf-car"></div>
+        </div>
+
+        <!-- Transport -->
+        <div class="ot-section" id="pdf-sec-transport">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">commute</i></div>
+                <h3 class="ot-sec-title">التنقلات</h3>
+            </div>
+            <table class="ot-trans-tbl">
+                <thead><tr>
+                    <th style="width:50%">المسار</th>
+                    <th style="width:30%">وسيلة النقل</th>
+                    <th style="width:20%">التاريخ</th>
+                </tr></thead>
+                <tbody id="pdf-transport"></tbody>
+            </table>
+        </div>
+
+        <!-- Program -->
+        <div class="ot-section" id="pdf-sec-program">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">map</i></div>
+                <h3 class="ot-sec-title">البرنامج السياحي</h3>
+            </div>
+            <div class="ot-timeline" id="pdf-program"></div>
+        </div>
+
+        <!-- Cost -->
+        <div class="ot-section">
+            <div class="ot-cost-card">
+                <div class="ot-cost-lbl">التكلفة الإجمالية للرحلة</div>
+                <div class="ot-cost-amt" id="pdf-price">-</div>
+                <div class="ot-cost-badge" id="pdf-disc">-</div>
+            </div>
+            <div class="ot-coord">منسق العرض: <strong id="pdf-coord">-</strong> ، استشاري قسم الحجوزات</div>
+        </div>
+
+        <!-- Includes/Excludes -->
+        <div class="ot-section">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">checklist</i></div>
+                <h3 class="ot-sec-title">ما تشمله وما لا تشمله الباقة</h3>
+            </div>
+            <div class="ot-inc-grid">
+                <div class="ot-inc-box inc">
+                    <h4><i class="material-icons">check_circle</i> الباقة تشمل</h4>
+                    <ul id="pdf-includes"></ul>
+                </div>
+                <div class="ot-inc-box exc">
+                    <h4><i class="material-icons">cancel</i> الباقة لا تشمل</h4>
+                    <ul id="pdf-excludes"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policies -->
+        <div class="ot-section" id="pdf-sec-policies">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">gavel</i></div>
+                <h3 class="ot-sec-title">سياسات وملاحظات هامة</h3>
+            </div>
+            <div id="pdf-policies"></div>
+        </div>
+
+        <!-- Payment -->
+        <div class="ot-section">
+            <div class="ot-sec-hdr">
+                <div class="ot-sec-icon"><i class="material-icons">account_balance_wallet</i></div>
+                <h3 class="ot-sec-title">طرق الدفع والحسابات البنكية</h3>
+            </div>
+            <div class="ot-pay-grid">
+                <div class="ot-pay-item"><i class="material-icons">payment</i>فيزا</div>
+                <div class="ot-pay-item"><i class="material-icons">credit_card</i>ماستر كارد</div>
+                <div class="ot-pay-item"><i class="material-icons">credit_score</i>مدى</div>
+                <div class="ot-pay-item"><i class="material-icons">account_balance_wallet</i>تابي / تمارا</div>
+            </div>
+            <div id="pdf-banks"></div>
+        </div>
+
+        <!-- Terms -->
+        <div class="ot-terms">
+            <h4><i class="material-icons">warning</i> تنبيه هام - الشروط العامة</h4>
+            <ul id="pdf-terms"></ul>
+        </div>
+
+    </div><!-- /ot-content -->
+
+    <!-- Footer -->
+    <div class="ot-footer">
+        <img src="" alt="logo" id="pdf-footer-logo">
+        <div class="ot-footer-name" id="pdf-footer-co">بوابات العالم للسفر والسياحة</div>
+        <div class="ot-footer-sub">World Gates For Travel &amp; Tourism</div>
+    </div>
+
+</div><!-- /ot-poster -->
+</div><!-- /offer-template -->
+
+
+<script>
+// ===================== HOTEL LINK OPENER =====================
+function openHotelLink(btn) {
+    const input = btn.closest('.link-input-wrap').querySelector('.hotel-url');
+    let url = input ? input.value.trim() : '';
+    if (!url) { showToast('لم يتم إدخال رابط الفندق', 'link_off'); return; }
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+}
+
+// ===================== IMAGE HANDLING =====================
+async function handleImageUpload(input, previewId, maxW = 900) {
+    if (!input.files || !input.files[0]) return;
+    try {
+        const src = await compressImage(input.files[0], maxW);
+        const preview = document.getElementById(previewId);
+        preview.innerHTML = `<img src="${src}" alt="preview" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+        // Store on both the input dataset and the preview img for reliable PDF retrieval
+        input.dataset.compressedSrc = src;
+        const img = preview.querySelector('img');
+        if (img) img.dataset.src = src;
+    } catch(e) { console.error(e); }
+}
+
+function compressImage(file, maxW = 900) {
+    return new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = e => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                res(canvas.toDataURL('image/jpeg', 0.82));
+            };
+            img.onerror = rej;
+        };
+        reader.onerror = rej;
+    });
+}
+
+// ===================== DYNAMIC SECTIONS =====================
+let counters = { flight:1, hotel:1, car:1, program:1, transport:1 };
+
+function removeSection(id, containerId) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+function addDynSection(containerId, cls, label, innerHTML) {
+    const id = Date.now();
+    const wrap = document.createElement('div');
+    wrap.className = `dyn-section ${cls}`;
+    wrap.id = `${cls}-${id}`;
+    wrap.innerHTML = `
+        <div class="dyn-section-header">
+            <span>${label}</span>
+            <button class="btn btn-danger" onclick="removeSection('${cls}-${id}','${containerId}')"><i class="material-icons">delete</i> حذف</button>
+        </div>
+        ${innerHTML}`;
+    document.getElementById(containerId).appendChild(wrap);
+}
+
+function flightInner() {
+    const alId = 'airline-logo-preview-' + Date.now();
+    return `<div class="form-grid">
+        <div class="form-group"><label>من</label><input type="text" class="flight-from" value=""></div>
+        <div class="form-group"><label>إلى</label><input type="text" class="flight-to" value=""></div>
+        <div class="form-group"><label>التاريخ</label><input type="text" class="flight-date" value=""></div>
+        <div class="form-group"><label>شركة الطيران</label><input type="text" class="airline" value=""></div>
+        <div class="form-group"><label>وقت المغادرة</label><input type="text" class="departure-time" value=""></div>
+        <div class="form-group"><label>وقت الوصول</label><input type="text" class="arrival-time" value=""></div>
+        <div class="form-group span-2"><label>نوع الرحلة</label><input type="text" class="flight-type" value="مباشر"></div>
+        <div class="form-group span-2"><label>شعار الخطوط (اختياري)</label>
+            <label class="upl-btn"><i class="material-icons">flight</i> رفع شعار
+                <input type="file" class="airline-logo-input" accept="image/*" style="display:none" onchange="handleImageUpload(this,'${alId}',300)">
+            </label>
+            <div class="airline-logo-preview img-thumb" id="${alId}" style="width:80px;height:40px;margin-top:.5rem;border-radius:6px;background:#1e2d3d;"></div>
+        </div>
+    </div>`;
+}
+function hotelInner(id) {
+    return `<div class="form-group" style="margin-bottom:.75rem;"><label>صورة الفندق</label>
+        <label class="upload-btn" onclick="document.getElementById('hotel-input-${id}').click()">
+            <i class="material-icons">image</i> رفع صورة
+            <input type="file" id="hotel-input-${id}" accept="image/*" style="display:none" onchange="handleImageUpload(this,'hotel-preview-${id}',600)">
+        </label>
+        <div class="img-thumb" id="hotel-preview-${id}" style="width:60px;height:60px;margin-top:.5rem;border-radius:8px;"></div>
+    </div>
+    <div class="form-grid">
+        <div class="form-group"><label>اسم الفندق</label><input type="text" class="hotel-name" value=""></div>
+        <div class="form-group"><label>المدينة</label><input type="text" class="hotel-city" value=""></div>
+        <div class="form-group"><label>تاريخ الإقامة</label><input type="text" class="hotel-dates" value=""></div>
+        <div class="form-group"><label>نوع الغرفة</label><input type="text" class="room-type" value=""></div>
+        <div class="form-group span-2">
+            <label>رابط الموقع الرسمي للفندق</label>
+            <div class="link-input-wrap">
+                <i class="material-icons link-icon">link</i>
+                <input type="text" class="hotel-url" placeholder="https://...">
+                <button type="button" class="link-open-btn" onclick="openHotelLink(this)" title="فتح الرابط">
+                    <i class="material-icons">open_in_new</i>
+                </button>
+            </div>
+        </div>
+    </div>`;
+}
+function carInner() {
+    return `<div class="form-grid">
+        <div class="form-group"><label>نوع السيارة</label><input type="text" class="car-type" value=""></div>
+        <div class="form-group"><label>تاريخ الاستئجار</label><input type="text" class="rental-dates" value=""></div>
+        <div class="form-group"><label>الموديل</label><input type="text" class="car-model" value=""></div>
+        <div class="form-group"><label>مدة الإيجار</label><input type="text" class="rental-duration" value=""></div>
+        <div class="form-group"><label>استلام من</label><input type="text" class="pickup-location" value=""></div>
+        <div class="form-group"><label>تسليم في</label><input type="text" class="dropoff-location" value=""></div>
+        <div class="form-group span-2"><label>المشمولات</label><textarea class="car-inclusions" rows="2"></textarea></div>
+    </div>`;
+}
+function programInner() {
+    return `<div class="form-group" style="margin-bottom:.75rem;"><label>عنوان اليوم</label><input type="text" class="program-title" value=""></div>
+    <div class="form-grid">
+        <div class="form-group"><label>نشاط 1</label><input type="text" class="activity" value=""></div>
+        <div class="form-group"><label>نشاط 2</label><input type="text" class="activity" value=""></div>
+    </div>`;
+}
+function transportInner() {
+    return `<div class="form-grid">
+        <div class="form-group"><label>من</label><input type="text" class="transport-from" value=""></div>
+        <div class="form-group"><label>إلى</label><input type="text" class="transport-to" value=""></div>
+        <div class="form-group"><label>التاريخ</label><input type="text" class="transport-date" value=""></div>
+        <div class="form-group"><label>وسيلة النقل</label><input type="text" class="transport-method" value=""></div>
+    </div>`;
+}
+
+document.getElementById('add-flight-btn').onclick = () => {
+    const n = ++counters.flight;
+    addDynSection('flights-container','flight-section',`✈ رحلة ${n}`, flightInner());
+};
+document.getElementById('add-hotel-btn').onclick = () => {
+    const id = Date.now();
+    const n = ++counters.hotel;
+    addDynSection('hotels-container','hotel-section',`🏨 فندق ${n}`, hotelInner(id));
+};
+document.getElementById('add-car-btn').onclick = () => {
+    const n = ++counters.car;
+    addDynSection('car-container','car-section',`🚗 سيارة ${n}`, carInner());
+};
+document.getElementById('add-program-btn').onclick = () => {
+    const n = ++counters.program;
+    addDynSection('program-container','program-section',`📅 يوم ${n}`, programInner());
+};
+document.getElementById('add-transport-btn').onclick = () => {
+    const n = ++counters.transport;
+    addDynSection('transport-container','transport-section',`🗺 تنقل ${n}`, transportInner());
+};
+
+function addIncludeItem() {
+    const id = Date.now();
+    const div = document.createElement('div');
+    div.className = 'inline-item'; div.id = `include-${id}`;
+    div.innerHTML = `<input type="text" class="include-text" placeholder="أدخل عنصر مشمول">
+        <button class="btn-remove-inline" onclick="removeSection('include-${id}','includes-container')"><i class="material-icons">close</i></button>`;
+    document.getElementById('includes-container').appendChild(div);
+}
+function addExcludeItem() {
+    const id = Date.now();
+    const div = document.createElement('div');
+    div.className = 'inline-item'; div.id = `exclude-${id}`;
+    div.innerHTML = `<input type="text" class="exclude-text" placeholder="أدخل عنصر غير مشمول">
+        <button class="btn-remove-inline" onclick="removeSection('exclude-${id}','excludes-container')"><i class="material-icons">close</i></button>`;
+    document.getElementById('excludes-container').appendChild(div);
+}
+
+// ===================== TABS =====================
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+});
+
+// ===================== TOAST =====================
+function showToast(msg, icon = 'check_circle') {
+    const t = document.getElementById('toast');
+    t.querySelector('.material-icons').textContent = icon;
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===================== SAVE / LOAD RECORDS =====================
+const STORAGE_KEY = 'tourism_offers_v2';
+
+document.getElementById('save-record-btn').onclick = () => {
+    const data = {
+        timestamp: Date.now(),
+        client: document.getElementById('client-name').value,
+        dest: document.getElementById('destination').value,
+        date: document.getElementById('travel-date').value,
+        flightSections: document.getElementById('flights-container').innerHTML,
+        hotelSections: document.getElementById('hotels-container').innerHTML,
+        carSections: document.getElementById('car-container').innerHTML,
+        programSections: document.getElementById('program-container').innerHTML,
+        transportSections: document.getElementById('transport-container').innerHTML,
+        includeSections: document.getElementById('includes-container').innerHTML,
+        excludeSections: document.getElementById('excludes-container').innerHTML,
+        totalPrice: document.getElementById('total-price').value,
+        currency: document.getElementById('currency').value,
+        discountBadge: document.getElementById('discount-badge').value,
+        coordinator: document.getElementById('coordinator').value,
+        programType: document.getElementById('program-type').value,
+        clientPhone: document.getElementById('client-phone').value,
+        cities: document.getElementById('cities').value,
+        nightsCount: document.getElementById('nights-count').value,
+        adultsCount: document.getElementById('adults-count').value,
+        childrenCount: document.getElementById('children-count').value,
+        beneficiary: document.getElementById('beneficiary').value,
+        policiesHotels: document.querySelector('.policy-hotels').value,
+        policiesFlights: document.querySelector('.policy-flights').value,
+        policiesWeight: document.querySelector('.policy-weight').value,
+        policiesAirport: document.querySelector('.policy-airport').value,
+        generalTerms: document.querySelector('.general-terms').value,
+        flightToggle: document.getElementById('flight-toggle').checked,
+        hotelsToggle: document.getElementById('hotels-toggle').checked,
+        carToggle: document.getElementById('car-toggle').checked,
+        programToggle: document.getElementById('program-toggle').checked,
+        transportToggle: document.getElementById('transport-toggle').checked,
+    };
+    let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    records.push(data);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    showToast('تم حفظ العرض بنجاح ✅');
+    loadRecordsList();
+};
+
+function loadRecordsList() {
+    const list = document.getElementById('records-list');
+    const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    if (records.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:1.5rem 0;font-size:.875rem;">لا توجد عروض محفوظة حالياً</p>';
+        return;
+    }
+    list.innerHTML = '';
+    records.forEach((rec, i) => {
+        const d = new Date(rec.timestamp).toLocaleDateString('ar-EG');
+        const div = document.createElement('div');
+        div.className = 'record-item';
+        div.innerHTML = `
+            <div>
+                <div class="record-name">${rec.client} — ${rec.dest}</div>
+                <div class="record-meta">${rec.date} &nbsp;|&nbsp; محفوظ: ${d}</div>
+            </div>
+            <div class="record-actions">
+                <button class="btn btn-success" onclick="loadRecord(${i})"><i class="material-icons">edit</i></button>
+                <button class="btn btn-danger" onclick="deleteRecord(${i})"><i class="material-icons">delete</i></button>
+            </div>`;
+        list.appendChild(div);
+    });
+}
+
+window.loadRecord = i => {
+    const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const rec = records[i];
+    const set = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined) el.value = val; };
+
+    set('client-name', rec.client);
+    set('destination', rec.dest);
+    set('travel-date', rec.date);
+    set('total-price', rec.totalPrice);
+    set('currency', rec.currency);
+    set('discount-badge', rec.discountBadge);
+    set('coordinator', rec.coordinator);
+    set('program-type', rec.programType);
+    set('client-phone', rec.clientPhone);
+    set('cities', rec.cities);
+    set('nights-count', rec.nightsCount);
+    set('adults-count', rec.adultsCount);
+    set('children-count', rec.childrenCount);
+    set('beneficiary', rec.beneficiary);
+    if(rec.policiesHotels) document.querySelector('.policy-hotels').value = rec.policiesHotels;
+    if(rec.policiesFlights) document.querySelector('.policy-flights').value = rec.policiesFlights;
+    if(rec.policiesWeight) document.querySelector('.policy-weight').value = rec.policiesWeight;
+    if(rec.policiesAirport) document.querySelector('.policy-airport').value = rec.policiesAirport;
+    if(rec.generalTerms) document.querySelector('.general-terms').value = rec.generalTerms;
+
+    if(rec.flightSections) document.getElementById('flights-container').innerHTML = rec.flightSections;
+    if(rec.hotelSections) document.getElementById('hotels-container').innerHTML = rec.hotelSections;
+    if(rec.carSections) document.getElementById('car-container').innerHTML = rec.carSections;
+    if(rec.programSections) document.getElementById('program-container').innerHTML = rec.programSections;
+    if(rec.transportSections) document.getElementById('transport-container').innerHTML = rec.transportSections;
+    if(rec.includeSections) document.getElementById('includes-container').innerHTML = rec.includeSections;
+    if(rec.excludeSections) document.getElementById('excludes-container').innerHTML = rec.excludeSections;
+
+    if(rec.flightToggle !== undefined) document.getElementById('flight-toggle').checked = rec.flightToggle;
+    if(rec.hotelsToggle !== undefined) document.getElementById('hotels-toggle').checked = rec.hotelsToggle;
+    if(rec.carToggle !== undefined) document.getElementById('car-toggle').checked = rec.carToggle;
+    if(rec.programToggle !== undefined) document.getElementById('program-toggle').checked = rec.programToggle;
+    if(rec.transportToggle !== undefined) document.getElementById('transport-toggle').checked = rec.transportToggle;
+
+    showToast('تم تحميل العرض');
+    document.querySelector('[data-tab="basic"]').click();
+};
+
+window.deleteRecord = i => {
+    if (!confirm('هل أنت متأكد من الحذف؟')) return;
+    let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    records.splice(i, 1);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    loadRecordsList();
+    showToast('تم الحذف', 'delete');
+};
+
+loadRecordsList();
+// ===================== DEFAULT COMPANY LOGO =====================
+        const DEFAULT_LOGO = 'data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAA2AKgDASIAAhEBAxEB/8QAHAABAAEFAQEAAAAAAAAAAAAAAAYBAwUHCAQC/8QANRAAAQMDAwIFAQYFBQAAAAAAAQIDBAAFEQYSIQcxEyJBUWEUFSNCcYGRCBZSYrEkMnKh8P/EABkBAQEAAwEAAAAAAAAAAAAAAAAEAgUGB//EACwRAAEDAwIFBAICAwAAAAAAAAEAAxECBDESIQUGE0FRcYGRoRTwByIyQmH/2gAMAwEAAhEDEQA/AOy6UpREpSlESlKURKUpREpSlESlKURKUpREqDdUuptg0DGSiYVTLm6nczBZUAoj+pZ/AnPr3POAcGpVqK4i02OZcdqVqYaKkIUrAUr8KSfTJwK5dmacjXK6ybvf33brcZThceccUUoz7JSDwkDAAzwAK0HG+YLbhQFLhmo4AzHnwuq5Y4Ra3rpdvCenT2Gaj4nsPPfx5Fq+/wAQGvJz6lW9cC1MgnahmOHFY9ApTmcn5AFXNPfxB63gPp+1UQLuxnzpWyGV49kqRgD9UmvfA6YN39lRtdgcKBx4yHChIPwVHBP71CeonTPUmjmvrZcF428nHjcKCCewUUkj9eKhsONVXgFYprpBwSDB99wvWLS35Vuj+H0aKajtBjV8g6p95XVPTPqJYNeW9TtscUxNZSDIhPEeI38j+pOfUfGcHiphXG/8PLTUfqTabhOlyIbJWW2lNKx4i1DASr+wk4P5j867Irqmg70xU5TE4/6PK8a5ltuGWnE3bbhz2umgxUM6au9M94+sHcFKUpWa0SVrjq+rVrd605KsFnemwoslL0p2Oyl11A8dkLTtU4nCSyXjlKVnKQBt9dj1BL7rG72/WDtlatrbjIeYaS4G1qUn6gIDDhwcFO9uUFcgjYjtnkiwFyuesZt3S/Kt06VZrddYUxp5q1uRXghRkJdbLalqU4EAMEqAGd6uOOPuzdSdVy7FbpX8kXGa89GaVIdixyWkOlag6E+YhQSkAjCjkkjvWbY6gOT7aZUK1toSlrx3lvyBsaa2sqHYcq2vJ3DICSlfJwCr5t+sC/ZJ0iA1a7ZGjvRUNlSwtMdLqxuLyUlIQsA8oyNp7kiiKFb+oM+9xNWN6amN3BiOw47FfSWWVS0WyeFowVcN+O6yjdnByOTjNSHT3UWa70wu+o5jjEuTbrgqEytMUsmWQpsBKWis+clZQEhRyocd8V7h1HS61DjR48WTJdRGLynFlpIDj8dtw7RvTjZIStJStYOeTjBNzSms7PdW7PEjWNiHFkvHwGyU4aIQhxGEJSdqvvADkJCSFYKvKVEUft2tNdxr7f5L2irxKiurJgtCE6gK2vBtvapS1AAs+dWUN4XwN2c18z9U6xvcqMmboq+QIke5QJDYbiKUspQ86Xyog8gNhggYBytQG4g4k8XWtyimL9s2xQE1w+BtQhrLfiNthSQHXC5y8g8+GQlK1EAgJOQnXu+H+VXmEQIaLtKU3JZdbU+pKPp3nk7VhSAFYaAOQoeb1xyRRP7bv2k+k+nILUSWjUNwfSwhlcNUl1psuKcecLaVAqUhgLUE5zuAGCeDg2HtbXXVFq1Vc9N3aIqPHtSbiy3GUAHkJuIf8NvcStAU+yTgq4I5O04mquoMJP0sq4WxptKYKbgspdLjkRpW0qWrKAMJaWFK2qJ4IweCb8HXL07UFvtaLcIinZ/00pD68utf6d9zBAxtVvaTg+YKSc8EjBFrtFw6m6oiQ4d/0/NZlxJ0lwOswFxm1tm2S288rVlJecbCASF8jckEZOydQT7lFctdqet12NrkW9apEy3IcU+zIQpnYjyZICkl3Jx+HGea+tNalm3r7fhJl21u4wZCzHCWVLSmOVKDSnE7xlR2KyNySCOQOM+WFrwsMQ0XRhpx51MbxXGj4PLxa84aUpRDSQ8kFe4+ZKhxxRFEJl8103dZt4Xp2S07dEx7dCDjBS2hkXR9G5wFX3bhjONrGcZUQAPw1jtJ671fp2TatG3KCFymrCyG4yoaiuO42mG2FOu+IQQsvu5yE7ShI5zzP2teNT7SLmi0oMJSmCyXX0+da4yJKSeMJCfEQMjcSQcJztzat+s7ZPvCPprDHdbmhkuTAsArGIpBIUgKO0y2doPOAvsQAoiyPV1biNHLCM7VPthf5ZJ/yBWpNPwk3W/QrcpRSh95KFkHnb64+cZreurbX9s6dm25JAcdby2T23g5T+mQK58jTZlmu7cptPhyoj2dix2Uk8pI/cGvMOcLbTxRl90S2QAfY7j4K7zlirqWTrbf+YmPcbfa6UiR2YsZuNGaS0y2kJQhIwABXjmyrJLRIts2Tb30qBbfjuuIUCCOUqSf8GsXpLWth1HGR9PNZYmY+9hvOBLqD68fiH9w4/xWuurentDW9mRNj3QRLqvKkw2nA8XlnnJSTlIP9WQB7E8V6BduvNMBy2oFQicwI8gxEfS5Oxot3Ljp3LhoqmBAk6pwRMz6AmVr3qRAj27qTdo1rCWY7byXW/D4SgqQlZCcdgCTgDtXRugb1Lv+l4t0mw/pXXcjaOygDgKGecGuY4am2pLD8hjxWEuBS0HgOJBGU5/Lj9a61iFhURlUYIDBbSW9gwnbjjHxioOGcwXHHHzXX/WhukAU5kn/AGJgeP3vTfco2fLLJDc1uPVmo14AAxSBJG05yfoXaUpW+WmSmBSlEVNqcEbRg/FNqcEbRg9xjvVaURU2pznaM4x2oEJBBCRkduKrSiKhAOMgcdviq4Ht2pSiKm1Oc7RnGO3pTanJOBk9ziq0oioEgZwAM9+KFKT3SDkY7elVpRFQpSRgpGPbFNqfYftVaURKgvUPp+xqFarhbnERbjjzbh929/yx2Pz/AOE6pUl7YsXrRafpkfu4VVnevWbodZqgj93XMV90PqeM6WZenJcgA8KZZ8ZJ+cpz/wB1f0v021FdJKWxa3LZGz949JaLYSPhJwVH8v3FSbrvfuo+irki6Wa9qVYZitqQqKysxncf7CSjJSe4J+R6DOP6No1n1Guf2xqq8zX7DDVjwMhpqW6OQgoQAlSRwTkew5ycQNchM0sdSq4PRzpnv4wN/wBlWO/yO7+T0G7UdfGqBjzMkx8+nZbH1D09tk3QrNjtyUofhpLkR9XJU4eVbj7K9fbjjgCs/oaLcIWkLXEuiUplsx0oWkHO0DhIPyBgH5zWapVzVgwy91mxBjTtiBj4x6Kd7iNw+x0XDI1at8yc/OfVKUpVihSlKURKUpREpSlESlKURKUpREpSlESlKURKUpRF4r7aoF8tEm03OOmREkoKHW1eo9x7EHBB9CAarY7XBstpjWq2R0R4kZsIabT6D3PuSeSfUkmlKy1VadM7LHRTq1xviV7KUpWKySlKURf/2Q==';
+        // Auto-set logo on load
+        (function() {
+            const logoImg = document.getElementById('company-logo-img');
+            if (logoImg) logoImg.src = DEFAULT_LOGO;
+        })();
+
+        function handleLogoUpload(input) {
+            if (!input.files || !input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const logoImg = document.getElementById('company-logo-img');
+                if (logoImg) logoImg.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+// ===================== PDF GENERATION =====================
+        document.getElementById('download-offer-btn').onclick = async () => {
+            const loading = document.getElementById('loading-overlay');
+            loading.style.display = 'flex';
+            try {
+                await document.fonts.ready;
+
+                // Logo / company
+                const logoImg2 = document.getElementById('company-logo-img');
+                const logoSrc = (logoImg2 && logoImg2.src && logoImg2.src !== window.location.href) ? logoImg2.src : DEFAULT_LOGO;
+                ['pdf-logo-img','pdf-footer-logo'].forEach(id => document.getElementById(id).src = logoSrc);
+                const companyName = document.getElementById('beneficiary').value || 'بوابات العالم للسفر والسياحة';
+                ['pdf-company-name','pdf-footer-co'].forEach(id => document.getElementById(id).textContent = companyName);
+
+                // Header background: main cover image > first hotel image > fallback
+                const mainCoverImg  = document.querySelector('#main-image-preview img');
+                const mainInput     = document.getElementById('main-image-input');
+                const mainSrc       = (mainInput && mainInput.dataset.compressedSrc)
+                                        || (mainCoverImg && mainCoverImg.src && mainCoverImg.src.startsWith('data:') ? mainCoverImg.src : null);
+                const firstHotelInput = document.querySelector('.hotel-section input[type="file"]');
+                const firstHotelPrev  = document.querySelector('[id^="hotel-preview-"] img');
+                const firstHotelSrc   = (firstHotelInput && firstHotelInput.dataset.compressedSrc)
+                                        || (firstHotelPrev && firstHotelPrev.src && firstHotelPrev.src.startsWith('data:') ? firstHotelPrev.src : null);
+                document.getElementById('pdf-header-img').src =
+                    mainSrc || firstHotelSrc ||
+                    'https://images.unsplash.com/photo-1568781269783-e69b164ad26e?w=1200&q=80';
+
+                // Basic info
+                const clientName = document.getElementById('client-name').value;
+                const dest       = document.getElementById('destination').value;
+                document.getElementById('pdf-main-title').textContent = 'برنامج خاص لـ ' + clientName;
+                document.getElementById('pdf-cities-sub').textContent = document.getElementById('cities').value;
+                document.getElementById('pdf-date').textContent       = document.getElementById('travel-date').value;
+                document.getElementById('pdf-nights').textContent     = document.getElementById('nights-count').value + ' ليالي';
+                const adults   = document.getElementById('adults-count').value;
+                const children = document.getElementById('children-count').value;
+                document.getElementById('pdf-pax').textContent        = adults + ' بالغين' + (parseInt(children) > 0 ? ' + ' + children + ' أطفال' : '');
+                document.getElementById('pdf-prog-type').textContent  = document.getElementById('program-type').value;
+                const curr = document.getElementById('currency').value === 'SAR' ? 'ريال' : '$';
+                document.getElementById('pdf-price').textContent      = Number(document.getElementById('total-price').value).toLocaleString('ar') + ' ' + curr;
+                document.getElementById('pdf-disc').textContent       = document.getElementById('discount-badge').value;
+                document.getElementById('pdf-coord').textContent      = document.getElementById('coordinator').value;
+
+                // Flights
+                const flightOn = document.getElementById('flight-toggle').checked;
+                document.getElementById('pdf-sec-flights').style.display = flightOn ? '' : 'none';
+                const flightsCont = document.getElementById('pdf-flights');
+                flightsCont.innerHTML = '';
+                if (flightOn) {
+                    document.querySelectorAll('.flight-section').forEach(sec => {
+                        const from = sec.querySelector('.flight-from')?.value || '';
+                        const to   = sec.querySelector('.flight-to')?.value   || '';
+                        const dt   = sec.querySelector('.flight-date')?.value  || '';
+                        const air  = sec.querySelector('.airline')?.value      || '';
+                        const dep  = sec.querySelector('.departure-time')?.value || '';
+                        const arr  = sec.querySelector('.arrival-time')?.value  || '';
+                        const type = sec.querySelector('.flight-type')?.value   || '';
+                        // Airline logo
+                        const alInput   = sec.querySelector('.airline-logo-input');
+                        const alPrevImg = sec.querySelector('.airline-logo-preview img');
+                        const alLogoSrc = (alInput && alInput.dataset.compressedSrc)
+                                        || (alPrevImg && alPrevImg.dataset.src)
+                                        || (alPrevImg && alPrevImg.src && alPrevImg.src.startsWith('data:') ? alPrevImg.src : null);
+                        const iconName  = type.includes('عودة') || type.includes('وصول') ? 'flight_land' : 'flight_takeoff';
+                        const icoHtml   = alLogoSrc
+                            ? '<img src="' + alLogoSrc + '" class="ot-airline-logo" alt="' + air + '">'
+                            : '<i class="material-icons">' + iconName + '</i>';
+                        flightsCont.innerHTML += '<div class="ot-flight">'                            + '<div class="ot-flight-ico">' + icoHtml + '</div>'                            + '<div class="ot-flight-det">'                            + '<div class="ot-flight-top">'                            + '<span class="ot-flight-route">' + from + ' \u2190 ' + to + '</span>'                            + '<span class="ot-flight-date">' + dt + '</span>'                            + '</div>'                            + '<div class="ot-flight-meta">'                            + '<span><i class="material-icons">business</i>' + air + '</span>'                            + '<span><i class="material-icons">schedule</i>' + dep + ' - ' + arr + '</span>'                            + '<span><i class="material-icons">swap_horiz</i>' + type + '</span>'                            + '</div>'                            + '</div></div>';
+                    });
+                }
+
+                // Hotels
+                const hotelOn = document.getElementById('hotels-toggle').checked;
+                document.getElementById('pdf-sec-hotels').style.display = hotelOn ? '' : 'none';
+                const hotelsCont = document.getElementById('pdf-hotels');
+                hotelsCont.innerHTML = '';
+                if (hotelOn) {
+                    const HOTEL_FALLBACKS = [
+                        'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80',
+                        'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&q=80',
+                        'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80',
+                        'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=400&q=80',
+                    ];
+                    let hCount = 0;
+                    document.querySelectorAll('.hotel-section').forEach(sec => {
+                        const name   = sec.querySelector('.hotel-name')?.value  || '';
+                        const city   = sec.querySelector('.hotel-city')?.value  || '';
+                        const dates  = sec.querySelector('.hotel-dates')?.value || '';
+                        const room   = sec.querySelector('.room-type')?.value   || '';
+                        const url    = (sec.querySelector('.hotel-url')?.value  || '').trim();
+                        // Check img-thumb preview div (the small 60x60 one) for uploaded image
+                        const previewDiv = sec.querySelector('[id^="hotel-preview-"]');
+                        const previewImg = previewDiv ? previewDiv.querySelector('img') : null;
+                        // Check all storage locations for uploaded image
+                        const fileInput  = sec.querySelector('input[type="file"]');
+                        const compressed = fileInput ? fileInput.dataset.compressedSrc : null;
+                        const imgDataSrc = previewImg ? (previewImg.dataset.src || '') : '';
+                        const imgSrcAttr = (previewImg && previewImg.src && previewImg.src.startsWith('data:')) ? previewImg.src : null;
+                        const uploadedSrc = compressed || imgDataSrc || imgSrcAttr || null;
+                        const imgSrc = uploadedSrc || HOTEL_FALLBACKS[hCount % HOTEL_FALLBACKS.length];
+                        hCount++;
+                        const linkHtml = url
+                            ? '<div class="ot-hotel-link" data-url="' + url + '">&#x1F517; زيارة الفندق</div>'
+                            : '';
+                        hotelsCont.innerHTML += '<div class="ot-hotel">'
+                            + '<img src="' + imgSrc + '" class="ot-hotel-img" alt="' + name + '" crossorigin="anonymous">'
+                            + '<div class="ot-hotel-body">'
+                            + '<div class="ot-hotel-dates">' + dates + '</div>'
+                            + '<div class="ot-hotel-name">' + name + (city ? ' &mdash; ' + city : '') + '</div>'
+                            + '<div class="ot-hotel-room"><i class="material-icons">king_bed</i>' + room + '</div>'
+                            + linkHtml
+                            + '</div></div>';
+                    });
+                }
+
+                // Car
+                const carOn = document.getElementById('car-toggle').checked;
+                document.getElementById('pdf-sec-car').style.display = carOn ? '' : 'none';
+                const carCont = document.getElementById('pdf-car');
+                carCont.innerHTML = '';
+                if (carOn) {
+                    document.querySelectorAll('.car-section').forEach(sec => {
+                        const carType   = sec.querySelector('.car-type')?.value    || '';
+                        const model     = sec.querySelector('.car-model')?.value   || '';
+                        const dur       = sec.querySelector('.rental-duration')?.value || '';
+                        const pickup    = sec.querySelector('.pickup-location')?.value  || '';
+                        const dropoff   = sec.querySelector('.dropoff-location')?.value || '';
+                        const incl      = sec.querySelector('.car-inclusions')?.value   || '';
+                        carCont.innerHTML += '<div class="ot-car">'
+                            + '<div class="ot-car-head">'
+                            + '<div class="ot-car-head-t"><i class="material-icons">time_to_leave</i>تفاصيل السيارة</div>'
+                            + '<span class="ot-car-badge">مدة الإيجار: ' + dur + '</span>'
+                            + '</div>'
+                            + '<table class="ot-car-tbl">'
+                            + '<tr><th>نوع السيارة</th><td>' + carType + '</td></tr>'
+                            + '<tr><th>الموديل</th><td>' + model + '</td></tr>'
+                            + '<tr><th>الاستلام</th><td>' + pickup + '</td></tr>'
+                            + '<tr><th>التسليم</th><td>' + dropoff + '</td></tr>'
+                            + '<tr><th>المشمولات</th><td>' + incl + '</td></tr>'
+                            + '</table></div>';
+                    });
+                }
+
+                // Transport
+                const transOn = document.getElementById('transport-toggle').checked;
+                document.getElementById('pdf-sec-transport').style.display = transOn ? '' : 'none';
+                const transBody = document.getElementById('pdf-transport');
+                transBody.innerHTML = '';
+                if (transOn) {
+                    document.querySelectorAll('.transport-section').forEach(sec => {
+                        const from   = sec.querySelector('.transport-from')?.value   || '';
+                        const to     = sec.querySelector('.transport-to')?.value     || '';
+                        const dt     = sec.querySelector('.transport-date')?.value   || '';
+                        const method = sec.querySelector('.transport-method')?.value || '';
+                        transBody.innerHTML += '<tr><td>' + from + ' \u2190 ' + to + '</td><td>' + method + '</td><td>' + dt + '</td></tr>';
+                    });
+                }
+
+                // Program
+                const progOn = document.getElementById('program-toggle').checked;
+                document.getElementById('pdf-sec-program').style.display = progOn ? '' : 'none';
+                const progCont = document.getElementById('pdf-program');
+                progCont.innerHTML = '';
+                if (progOn) {
+                    document.querySelectorAll('.program-section').forEach(sec => {
+                        const title = sec.querySelector('.program-title')?.value || '';
+                        const acts  = Array.from(sec.querySelectorAll('.activity')).map(a => a.value).filter(Boolean);
+                        const actsHtml = acts.map(a => '<div class="ot-act-tag"><i class="material-icons">chevron_left</i>' + a + '</div>').join('');
+                        progCont.innerHTML += '<div class="ot-tl-item">'
+                            + '<div class="ot-tl-dot"></div>'
+                            + '<div class="ot-tl-title"><i class="material-icons">location_on</i>' + title + '</div>'
+                            + '<div class="ot-tl-body">' + actsHtml + '</div>'
+                            + '</div>';
+                    });
+                }
+
+                // Includes / Excludes
+                const incList = document.getElementById('pdf-includes');
+                const excList = document.getElementById('pdf-excludes');
+                incList.innerHTML = ''; excList.innerHTML = '';
+                document.querySelectorAll('.include-text').forEach(inp => {
+                    if (inp.value.trim()) incList.innerHTML += '<li><i class="material-icons">check</i>' + inp.value + '</li>';
+                });
+                document.querySelectorAll('.exclude-text').forEach(inp => {
+                    if (inp.value.trim()) excList.innerHTML += '<li><i class="material-icons">close</i>' + inp.value + '</li>';
+                });
+
+                // Policies
+                const polCont = document.getElementById('pdf-policies');
+                polCont.innerHTML = '';
+                const policyDefs = [
+                    { sel: '.policy-hotels',  icon: 'hotel',    title: 'الفنادق' },
+                    { sel: '.policy-flights', icon: 'flight',   title: 'الطيران' },
+                    { sel: '.policy-weight',  icon: 'luggage',  title: 'الوزن المسموح به' },
+                    { sel: '.policy-airport', icon: 'schedule', title: 'مواعيد الحضور للمطار' },
+                ];
+                policyDefs.forEach(p => {
+                    const val = document.querySelector(p.sel)?.value || '';
+                    if (!val.trim()) return;
+                    const lines = val.split('\n').filter(l => l.trim()).map(l => '<li>' + l + '</li>').join('');
+                    polCont.innerHTML += '<div class="ot-policy">'
+                        + '<div class="ot-pol-head"><i class="material-icons">' + p.icon + '</i><h4>' + p.title + '</h4></div>'
+                        + '<div class="ot-pol-body"><ul class="ot-pol-list">' + lines + '</ul></div>'
+                        + '</div>';
+                });
+
+                // Banks
+                const banksCont = document.getElementById('pdf-banks');
+                banksCont.innerHTML = '';
+                const beneficiary = document.getElementById('beneficiary').value;
+                const bankLabels  = ['بنك الراجحي', 'البنك الأهلي (SNB)', 'بنك البلاد', 'بنك SAB'];
+                let bankIdx = 0;
+                document.querySelectorAll('#payment .card').forEach(card => {
+                    const titleEl = card.querySelector('.card-title');
+                    if (!titleEl) return;
+                    const acc  = card.querySelector('.bank-account')?.value || '';
+                    const iban = card.querySelector('.bank-iban')?.value    || '';
+                    if (!acc && !iban) return;
+                    const bankName = bankLabels[bankIdx] || titleEl.textContent.trim();
+                    bankIdx++;
+                    banksCont.innerHTML += '<div class="ot-bank">'
+                        + '<div class="ot-bank-head"><i class="material-icons">account_balance</i>' + bankName + '</div>'
+                        + '<div class="ot-bank-row"><span class="ot-bank-lbl">رقم الحساب</span><span class="ot-bank-val">' + acc + '</span></div>'
+                        + '<div class="ot-bank-row"><span class="ot-bank-lbl">الآيبان</span><span class="ot-bank-val">' + iban + '</span></div>'
+                        + '<div class="ot-bank-benef">المستفيد: ' + beneficiary + '</div>'
+                        + '</div>';
+                });
+
+                // Terms
+                const termsList = document.getElementById('pdf-terms');
+                termsList.innerHTML = '';
+                const termsVal = document.querySelector('.general-terms')?.value || '';
+                termsVal.split('\n').filter(l => l.trim()).forEach(l => {
+                    termsList.innerHTML += '<li>' + l + '</li>';
+                });
+
+                // ===== RENDER PDF =====
+                const template = document.getElementById('offer-template');
+
+                // Show template ON-SCREEN for accurate measurement & rendering
+                template.removeAttribute('style');
+                template.style.display    = 'block';
+                template.style.position   = 'fixed';
+                template.style.left       = '0';
+                template.style.top        = '0';
+                template.style.width      = '794px';
+                template.style.zIndex     = '99999';
+                template.style.background = '#E5E5E5';
+                document.body.style.overflow = 'hidden';
+
+                await new Promise(res => setTimeout(res, 1500));
+
+                const { jsPDF } = window.jspdf;
+                const SCALE     = 2;
+                const MM_PER_PX = 210 / 794;
+                const PAGE_H_PX = Math.round(297 / MM_PER_PX); // ~1122px
+
+                // Measure atom positions while template is visible
+                const ATOM_SEL = [
+                    '.ot-header','.ot-overview','.ot-sec-hdr',
+                    '.ot-flight','.ot-hotel','.ot-car',
+                    '.ot-trans-tbl','.ot-tl-item',
+                    '.ot-cost-card','.ot-coord',
+                    '.ot-inc-grid','.ot-policy',
+                    '.ot-pay-grid','.ot-bank',
+                    '.ot-terms','.ot-footer'
+                ];
+                const tRect = template.getBoundingClientRect();
+                const atomRects = [];
+                ATOM_SEL.forEach(sel => {
+                    template.querySelectorAll(sel).forEach(el => {
+                        const r   = el.getBoundingClientRect();
+                        const top = Math.round(r.top - tRect.top);
+                        const bot = Math.round(r.bottom - tRect.top);
+                        if (bot > top + 5) atomRects.push({ top, bot });
+                    });
+                });
+                atomRects.sort((a, b) => a.top - b.top);
+                const totalH = template.scrollHeight;
+
+                // Build smart cut points — never cut inside an atom
+                const cuts = [0];
+                let ps = 0;
+                while (ps < totalH) {
+                    const pe = ps + PAGE_H_PX - 20;
+                    if (pe >= totalH) break;
+                    let cut = pe;
+                    for (const a of atomRects) {
+                        if (a.top > ps + 60 && a.top < pe && a.bot > pe) {
+                            cut = a.top - 4;
+                            break;
+                        }
+                    }
+                    if (cut <= ps + 40) cut = pe;
+                    cuts.push(Math.round(cut));
+                    ps = Math.round(cut);
+                }
+                cuts.push(totalH);
+
+                // Render full canvas
+                const fullCanvas = await html2canvas(template, {
+                    scale: SCALE,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    backgroundColor: '#E5E5E5',
+                    width: 794,
+                    windowWidth: 794,
+                    scrollX: 0,
+                    scrollY: 0,
+                    x: 0,
+                    y: 0
+                });
+
+                // Collect hotel link positions BEFORE hiding template
+                const hotelLinks = [];
+                template.querySelectorAll('.ot-hotel-link[data-url]').forEach(el => {
+                    const r = el.getBoundingClientRect();
+                    hotelLinks.push({
+                        url:    el.dataset.url,
+                        top:    r.top    - tRect.top,
+                        left:   r.left   - tRect.left,
+                        width:  r.width,
+                        height: r.height
+                    });
+                });
+
+                // Hide template
+                template.style.display = 'none';
+                document.body.style.overflow = '';
+
+                const CW = fullCanvas.width;
+                const CH = fullCanvas.height;
+
+                // Slice canvas into PDF pages
+                const pdf  = new jsPDF({ orientation:'p', unit:'mm', format:'a4', compress:true });
+                const pdfW = pdf.internal.pageSize.getWidth();
+
+                for (let i = 0; i < cuts.length - 1; i++) {
+                    const y0  = Math.round(cuts[i]   * SCALE);
+                    const y1  = Math.min(Math.round(cuts[i+1] * SCALE), CH);
+                    const sh  = y1 - y0;
+                    if (sh <= 2) continue;
+
+                    const hmm = (cuts[i+1] - cuts[i]) * MM_PER_PX;
+
+                    const pc  = document.createElement('canvas');
+                    pc.width  = CW;
+                    pc.height = sh;
+                    const ctx = pc.getContext('2d');
+                    ctx.fillStyle = '#E5E5E5';
+                    ctx.fillRect(0, 0, CW, sh);
+                    ctx.drawImage(fullCanvas, 0, y0, CW, sh, 0, 0, CW, sh);
+
+                    if (i > 0) pdf.addPage([210, hmm]);
+                    pdf.addImage(pc.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdfW, hmm, '', 'FAST');
+                }
+
+                // Add real clickable links for hotels
+                // We need to figure out which page each link falls on
+                if (hotelLinks.length > 0) {
+                    for (const lnk of hotelLinks) {
+                        // Find which page this link is on
+                        let pageIdx = 0;
+                        let yOffsetInPage = lnk.top;
+                        for (let p = 0; p < cuts.length - 1; p++) {
+                            if (lnk.top >= cuts[p] && lnk.top < cuts[p+1]) {
+                                pageIdx = p + 1; // jsPDF pages are 1-indexed
+                                yOffsetInPage = lnk.top - cuts[p];
+                                break;
+                            }
+                        }
+                        // Convert px to mm
+                        const xMm = lnk.left  * MM_PER_PX;
+                        const yMm = yOffsetInPage * MM_PER_PX;
+                        const wMm = lnk.width  * MM_PER_PX;
+                        const hMm = lnk.height * MM_PER_PX;
+                        pdf.setPage(pageIdx);
+                        pdf.link(xMm, yMm, wMm, hMm, { url: lnk.url });
+                    }
+                }
+
+                const fname = document.getElementById('client-name').value.replace(/\s+/g, '_');
+                pdf.save('\u0639\u0631\u0636_' + fname + '.pdf');
+                showToast('\u062a\u0645 \u062a\u062d\u0645\u064a\u0644 PDF \u0628\u0646\u062c\u0627\u062d \ud83c\udf89');
+
+            } catch (err) {
+                console.error(err);
+                showToast('\u062d\u062f\u062b \u062e\u0637\u0623 \u0623\u062b\u0646\u0627\u0621 \u0625\u0646\u0634\u0627\u0621 \u0627\u0644\u0645\u0644\u0641', 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        };
+
+</script>
+</body>
+</html>
